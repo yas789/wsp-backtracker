@@ -1,6 +1,6 @@
 # WSP Solver: Workflow Satisfiability & Constraint Manager
  
-This repository contains the code for my Final Year Project (FYP), which focuses on solving the **Workflow Satisfiability Problem (WSP)** with both a Fixed‑Parameter Tractable (FPT) backtracking algorithm and a SAT/CSP encoding using Google OR‑Tools. A Swing‑based GUI ties everything together in a simple wizard.
+This repository focuses on solving the **Workflow Satisfiability Problem (WSP)** with both a Fixed‑Parameter Tractable (FPT) backtracking algorithm and a SAT/CSP encoding using Google OR‑Tools. 
 
 ---
 ## ⚙️ Prerequisites
