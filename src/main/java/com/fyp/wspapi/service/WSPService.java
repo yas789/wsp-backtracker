@@ -331,26 +331,17 @@ public class WSPService {
         String solverUsed = request.getSolverType().toUpperCase();
         
         try {
-            // Convert auth matrix to the format expected by the solver
-            int[][] stepByUser = new int[numUsers][numSteps];
-            for (int u = 0; u < numUsers; u++) {
-                for (int s = 0; s < numSteps; s++) {
-                    stepByUser[u][s] = authMatrix.get(u).get(s) ? 1 : 0;
-                }
-            }
+            // Use the authorization matrix from the request
+            int[][] stepByUser = request.getAuthorized();
             
-            // Get must-same and must-different constraints
-            List<int[]> mustSame = new ArrayList<>();
-            List<int[]> mustDifferent = new ArrayList<>();
-            
-            for (ConstraintData constraint : constraints.values()) {
-                int[] steps = {constraint.step1, constraint.step2};
-                if (constraint.type == ConstraintType.BOD) {
-                    mustSame.add(steps);
-                } else {
-                    mustDifferent.add(steps);
-                }
-            }
+            // Get must-same and must-different constraints from the request
+            List<int[]> mustSame = request.getMustSameConstraints().stream()
+                .map(c -> new int[]{c.getStep1(), c.getStep2()})
+                .collect(Collectors.toList());
+                
+            List<int[]> mustDifferent = request.getMustDifferentConstraints().stream()
+                .map(c -> new int[]{c.getStep1(), c.getStep2()})
+                .collect(Collectors.toList());
             
             // Call the appropriate solver
             int[] solution;

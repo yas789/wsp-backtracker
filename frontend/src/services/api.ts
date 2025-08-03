@@ -70,11 +70,13 @@ apiClient.interceptors.response.use(
   }
 );
 
+// Matches backend's WSPRequest.Constraint class
 export interface Constraint {
   step1: number;
   step2: number;
 }
 
+// Matches backend's WSPRequest class
 export interface WSPRequest {
   numSteps: number;
   numUsers: number;

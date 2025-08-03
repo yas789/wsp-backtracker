@@ -56,7 +56,7 @@ interface Solution {
 }
 
 const AlgorithmPage = () => {
-  const [selectedAlgorithm, setSelectedAlgorithm] = useState<string>('backtracking');
+  const [selectedAlgorithm, setSelectedAlgorithm] = useState<string>('csp');
   const [isSolving, setIsSolving] = useState<boolean>(false);
   const [solutions, setSolutions] = useState<Solution[]>([]);
   const [currentSolution, setCurrentSolution] = useState<Solution | null>(null);
@@ -120,23 +120,45 @@ const AlgorithmPage = () => {
       const mustSameConstraints: Array<{step1: number, step2: number}> = [];
       const mustDifferentConstraints: Array<{step1: number, step2: number}> = [];
 
+      console.log('Original constraints:', JSON.stringify(constraints, null, 2));
+      
       // Convert frontend constraints to backend format
       constraints.forEach((constraint: Constraint) => {
-        if (constraint.steps.length >= 2) {
+        if (constraint.steps && constraint.steps.length >= 2) {
           // For each pair of steps in the constraint
           for (let i = 0; i < constraint.steps.length - 1; i++) {
             const step1 = constraint.steps[i];
             const step2 = constraint.steps[i + 1];
             
+            // Ensure steps are valid numbers
+            if (typeof step1 !== 'number' || typeof step2 !== 'number') {
+              console.error('Invalid step values:', { step1, step2, constraint });
+              continue;
+            }
+            
             if (constraint.type === 'binding') {
-              mustSameConstraints.push({ step1, step2 });
+              mustSameConstraints.push({ 
+                step1: Number(step1), 
+                step2: Number(step2) 
+              });
             } else if (constraint.type === 'separation') {
-              mustDifferentConstraints.push({ step1, step2 });
+              mustDifferentConstraints.push({ 
+                step1: Number(step1), 
+                step2: Number(step2) 
+              });
             }
           }
         }
       });
+      
+      console.log('Transformed constraints:', { 
+        mustSameConstraints, 
+        mustDifferentConstraints 
+      });
 
+      // Ensure solver type is in the correct case for backend
+      const solverType = selectedAlgorithm.toUpperCase() as 'CSP' | 'SAT';
+      
       // Prepare the request according to backend's WSPRequest
       const request = {
         numSteps: stepsCount,
@@ -144,32 +166,45 @@ const AlgorithmPage = () => {
         authorized: authMatrix,
         mustSameConstraints,
         mustDifferentConstraints,
-        solverType: selectedAlgorithm === 'backtracking' ? 'CSP' : 'SAT' // Map frontend algorithm to backend solver
+        solverType
       };
+      
+      console.log('Using solver type:', solverType);
 
       const response = await apiClient.post('/wsp/solve', request);
 
-      // Transform backend response to frontend format if needed
+      // Transform backend response to frontend format
       if (response.data) {
-        // Assuming the backend returns assignments in the format we expect
-        // You might need to adjust this based on actual backend response
-        const solutions = [{
-          assignment: response.data.assignments || {},
-          isComplete: response.data.isComplete || false,
-          stats: response.data.stats || {}
-        }];
+        const backendResponse = response.data;
         
-        setSolutions(solutions);
-        
-        // Set execution stats if available
-        if (response.data.stats) {
-          const { executionTime } = response.data.stats;
-          setExecutionStats({
-            totalTime: executionTime || 0,
-            totalSolutions: solutions.length,
-            averageTime: executionTime || 0
+        // Convert the backend's assignment array to our frontend format
+        const assignment: Record<number, number> = {};
+        if (backendResponse.assignment) {
+          backendResponse.assignment.forEach((userId: number, stepIndex: number) => {
+            if (userId >= 0) { // -1 typically means no assignment
+              assignment[stepIndex] = userId;
+            }
           });
         }
+
+        const solution = {
+          assignment,
+          isComplete: backendResponse.solutionFound || false,
+          stats: {
+            executionTime: backendResponse.solvingTimeMs || 0,
+            nodesVisited: 0, // Not provided by backend
+            backtracks: 0    // Not provided by backend
+          }
+        };
+        
+        setSolutions([solution]);
+        
+        // Set execution stats
+        setExecutionStats({
+          totalTime: backendResponse.solvingTimeMs || 0,
+          totalSolutions: backendResponse.solutionFound ? 1 : 0,
+          averageTime: backendResponse.solvingTimeMs || 0
+        });
 
         toast({
           title: 'Solution found',
@@ -245,10 +280,8 @@ const AlgorithmPage = () => {
                 onChange={(e) => setSelectedAlgorithm(e.target.value)}
                 isDisabled={isSolving}
               >
-                <option value="backtracking">Backtracking</option>
-                <option value="backjumping">Backjumping</option>
-                <option value="forwardChecking">Forward Checking</option>
-                <option value="arcConsistency">Arc Consistency</option>
+                <option value="csp">CSP Solver (Backtracking)</option>
+                <option value="sat">SAT Solver</option>
               </Select>
               <Text fontSize="sm" color="gray.500" mt={1}>
                 Select the constraint satisfaction algorithm to use
