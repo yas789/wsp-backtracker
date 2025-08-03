@@ -36,9 +36,9 @@ import {
 } from '@chakra-ui/react';
 import { AddIcon, DeleteIcon } from '@chakra-ui/icons';
 
-type ConstraintType = 'separation' | 'binding' | 'cardinality';
+type ConstraintType = 'separation' | 'binding';
 
-interface Constraint {
+export interface Constraint {
   id: string;
   type: ConstraintType;
   steps: number[];
@@ -51,7 +51,7 @@ const ConstraintsPage = () => {
   const [selectedType, setSelectedType] = useState<ConstraintType>('separation');
   const [selectedSteps, setSelectedSteps] = useState<number[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
-  const [kValue, setKValue] = useState<number>(1);
+  // Removed kValue state as it's not used in the Java backend
   const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate();
   const toast = useToast();
@@ -70,10 +70,10 @@ const ConstraintsPage = () => {
   }, [constraints]);
 
   const handleAddConstraint = () => {
-    if (selectedSteps.length < 2) {
+    if (selectedSteps.length !== 2) {
       toast({
         title: 'Error',
-        description: 'Please select at least 2 steps for the constraint.',
+        description: 'Please select exactly 2 steps for the constraint.',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -81,24 +81,14 @@ const ConstraintsPage = () => {
       return;
     }
 
-    // For cardinality constraint, validate k value
-    if (selectedType === 'cardinality' && (kValue < 1 || kValue > selectedSteps.length)) {
-      toast({
-        title: 'Error',
-        description: `K must be between 1 and ${selectedSteps.length} for the selected steps.`,
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
+    // Only separation and binding constraints are supported
 
     const newConstraint: Constraint = {
       id: Date.now().toString(),
       type: selectedType,
       steps: [...selectedSteps],
       ...(selectedUsers.length > 0 && { users: [...selectedUsers] }),
-      ...(selectedType === 'cardinality' && { k: kValue }),
+      // No additional properties needed for separation/binding constraints
     };
 
     setConstraints([...constraints, newConstraint]);
@@ -106,7 +96,6 @@ const ConstraintsPage = () => {
     // Reset form
     setSelectedSteps([]);
     setSelectedUsers([]);
-    setKValue(1);
     onClose();
     
     toast({
@@ -127,29 +116,14 @@ const ConstraintsPage = () => {
   };
 
   const getConstraintLabel = (constraint: Constraint) => {
-    switch (constraint.type) {
-      case 'separation':
-        return `Separation of Duty (Steps: ${constraint.steps.join(', ')})`;
-      case 'binding':
-        return `Binding of Duty (Steps: ${constraint.steps.join(', ')})`;
-      case 'cardinality':
-        return `Cardinality (Steps: ${constraint.steps.join(', ')}, k=${constraint.k})`;
-      default:
-        return 'Unknown Constraint';
-    }
+    const stepText = `Step ${constraint.steps[0]} and Step ${constraint.steps[1]}`;
+    return constraint.type === 'separation' 
+      ? `Separation of Duty: ${stepText} must be assigned to different users`
+      : `Binding of Duty: ${stepText} must be assigned to the same user`;
   };
 
   const getConstraintColor = (type: ConstraintType) => {
-    switch (type) {
-      case 'separation':
-        return 'red';
-      case 'binding':
-        return 'blue';
-      case 'cardinality':
-        return 'green';
-      default:
-        return 'gray';
-    }
+    return type === 'separation' ? 'red' : 'blue';
   };
 
   // Get steps and users count from session storage
@@ -248,57 +222,56 @@ const ConstraintsPage = () => {
                   value={selectedType}
                   onChange={(e) => setSelectedType(e.target.value as ConstraintType)}
                 >
-                  <option value="separation">Separation of Duty</option>
-                  <option value="binding">Binding of Duty</option>
-                  <option value="cardinality">Cardinality</option>
+                  <option value="separation">Separation of Duty (SoD)</option>
+                  <option value="binding">Binding of Duty (BoD)</option>
                 </Select>
               </FormControl>
 
               <FormControl>
-                <FormLabel>
-                  Select Steps {selectedSteps.length > 0 && `(${selectedSteps.length} selected)`}
-                </FormLabel>
-                <HStack spacing={2} flexWrap="wrap">
-                  {Array.from({ length: stepsCount }, (_, i) => i + 1).map((step) => (
-                    <Button
-                      key={step}
-                      size="sm"
-                      variant={selectedSteps.includes(step) ? 'solid' : 'outline'}
-                      colorScheme={selectedSteps.includes(step) ? 'blue' : 'gray'}
-                      onClick={() => {
-                        if (selectedSteps.includes(step)) {
-                          setSelectedSteps(selectedSteps.filter(s => s !== step));
-                        } else {
-                          setSelectedSteps([...selectedSteps, step]);
-                        }
-                      }}
-                    >
-                      Step {step}
-                    </Button>
-                  ))}
+                <FormLabel>Select 2 Steps</FormLabel>
+                <HStack spacing={4}>
+                  <Select 
+                    placeholder="First step"
+                    value={selectedSteps[0] || ''}
+                    onChange={(e) => {
+                      const newSteps = [...selectedSteps];
+                      newSteps[0] = parseInt(e.target.value);
+                      setSelectedSteps(newSteps);
+                    }}
+                  >
+                    {Array.from({ length: stepsCount }, (_, i) => i + 1).map((step) => (
+                      <option key={`first-${step}`} value={step} disabled={selectedSteps[1] === step}>
+                        Step {step}
+                      </option>
+                    ))}
+                  </Select>
+                  
+                  <Select
+                    placeholder="Second step"
+                    value={selectedSteps[1] || ''}
+                    onChange={(e) => {
+                      const newSteps = [...selectedSteps];
+                      newSteps[1] = parseInt(e.target.value);
+                      setSelectedSteps(newSteps);
+                    }}
+                  >
+                    {Array.from({ length: stepsCount }, (_, i) => i + 1).map((step) => (
+                      <option key={`second-${step}`} value={step} disabled={selectedSteps[0] === step}>
+                        Step {step}
+                      </option>
+                    ))}
+                  </Select>
                 </HStack>
+                {selectedSteps.length === 2 && (
+                  <Text mt={2} fontSize="sm" color="gray.500">
+                    {selectedType === 'separation' 
+                      ? 'These steps must be assigned to different users'
+                      : 'These steps must be assigned to the same user'}
+                  </Text>
+                )}
               </FormControl>
 
-              {selectedType === 'cardinality' && (
-                <FormControl>
-                  <FormLabel>Maximum number of users (k)</FormLabel>
-                  <NumberInput 
-                    min={1} 
-                    max={selectedSteps.length} 
-                    value={kValue}
-                    onChange={(_, value) => setKValue(value)}
-                  >
-                    <NumberInputField />
-                    <NumberInputStepper>
-                      <NumberIncrementStepper />
-                      <NumberDecrementStepper />
-                    </NumberInputStepper>
-                  </NumberInput>
-                  <Text fontSize="sm" color="gray.500" mt={1}>
-                    Maximum number of users that can be assigned to the selected steps
-                  </Text>
-                </FormControl>
-              )}
+              {/* Removed cardinality constraint UI as it's not supported in the backend */}
 
               <FormControl>
                 <FormLabel>Apply to Specific Users (Optional)</FormLabel>

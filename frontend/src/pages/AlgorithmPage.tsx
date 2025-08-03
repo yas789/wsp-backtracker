@@ -43,6 +43,7 @@ import {
 } from '@chakra-ui/react';
 import { RepeatIcon, InfoOutlineIcon, CheckCircleIcon, WarningIcon, TimeIcon } from '@chakra-ui/icons';
 import apiClient from '../services/api';
+import { Constraint } from './ConstraintsPage';
 
 interface Solution {
   assignment: Record<number, number>; // step -> user
@@ -115,31 +116,64 @@ const AlgorithmPage = () => {
     setExecutionStats(null);
 
     try {
-      const response = await apiClient.post('/solve', {
-        steps: stepsCount,
-        users: usersCount,
-        authMatrix,
-        constraints,
-        algorithm: selectedAlgorithm,
-        findAll: true, // Find all solutions
+      // Transform constraints to backend format
+      const mustSameConstraints: Array<{step1: number, step2: number}> = [];
+      const mustDifferentConstraints: Array<{step1: number, step2: number}> = [];
+
+      // Convert frontend constraints to backend format
+      constraints.forEach((constraint: Constraint) => {
+        if (constraint.steps.length >= 2) {
+          // For each pair of steps in the constraint
+          for (let i = 0; i < constraint.steps.length - 1; i++) {
+            const step1 = constraint.steps[i];
+            const step2 = constraint.steps[i + 1];
+            
+            if (constraint.type === 'binding') {
+              mustSameConstraints.push({ step1, step2 });
+            } else if (constraint.type === 'separation') {
+              mustDifferentConstraints.push({ step1, step2 });
+            }
+          }
+        }
       });
 
-      if (response.data && response.data.solutions) {
-        setSolutions(response.data.solutions);
+      // Prepare the request according to backend's WSPRequest
+      const request = {
+        numSteps: stepsCount,
+        numUsers: usersCount,
+        authorized: authMatrix,
+        mustSameConstraints,
+        mustDifferentConstraints,
+        solverType: selectedAlgorithm === 'backtracking' ? 'CSP' : 'SAT' // Map frontend algorithm to backend solver
+      };
+
+      const response = await apiClient.post('/wsp/solve', request);
+
+      // Transform backend response to frontend format if needed
+      if (response.data) {
+        // Assuming the backend returns assignments in the format we expect
+        // You might need to adjust this based on actual backend response
+        const solutions = [{
+          assignment: response.data.assignments || {},
+          isComplete: response.data.isComplete || false,
+          stats: response.data.stats || {}
+        }];
         
-        // Calculate execution stats if available
+        setSolutions(solutions);
+        
+        // Set execution stats if available
         if (response.data.stats) {
-          const { executionTime, solutionsCount } = response.data.stats;
+          const { executionTime } = response.data.stats;
           setExecutionStats({
-            totalTime: executionTime,
-            totalSolutions: solutionsCount,
-            averageTime: solutionsCount > 0 ? executionTime / solutionsCount : 0,
+            totalTime: executionTime || 0,
+            totalSolutions: solutions.length,
+            averageTime: executionTime || 0
           });
         }
 
         toast({
           title: 'Solution found',
-          description: `Found ${response.data.solutions.length} solution(s)`,
+          description: `Found solution`,
           status: 'success',
           duration: 3000,
           isClosable: true,

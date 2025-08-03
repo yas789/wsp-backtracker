@@ -70,14 +70,18 @@ apiClient.interceptors.response.use(
   }
 );
 
+export interface Constraint {
+  step1: number;
+  step2: number;
+}
+
 export interface WSPRequest {
-  steps: number;
-  users: number;
-  authorizations: number[][];
-  constraints: Array<{
-    type: 'SOD' | 'BOD';
-    steps: number[];
-  }>;
+  numSteps: number;
+  numUsers: number;
+  authorized: number[][];
+  mustSameConstraints: Constraint[];      // For BOD (Binding of Duty)
+  mustDifferentConstraints: Constraint[]; // For SOD (Separation of Duty)
+  solverType: 'SAT' | 'CSP';
 }
 
 export interface WSPSolution {
@@ -86,8 +90,13 @@ export interface WSPSolution {
 }
 
 export const wspApi = {
-  async solveWSP(request: WSPRequest): Promise<WSPSolution> {
-    const response = await apiClient.post<WSPSolution>('/solve', request);
+  async solveWSP(request: Omit<WSPRequest, 'solverType'> & { solverType?: 'SAT' | 'CSP' }): Promise<WSPSolution> {
+    // Ensure solverType has a default value if not provided
+    const payload: WSPRequest = {
+      ...request,
+      solverType: request.solverType || 'SAT' // Default to SAT solver if not specified
+    };
+    const response = await apiClient.post<WSPSolution>('/wsp/solve', payload);
     return response.data;
   },
 

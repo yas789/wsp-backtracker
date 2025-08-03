@@ -21,12 +21,12 @@ export const useWSP = (): UseWSPReturn => {
     try {
       const result = await wspApi.solveWSP(request);
       setSolution(result);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error solving WSP:', err);
-      setError(
-        err.response?.data?.message || 
-        'Failed to solve the workflow satisfiability problem. Please try again.'
-      );
+      const errorMessage = err && typeof err === 'object' && 'response' in err
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        : 'Failed to solve the workflow satisfiability problem. Please try again.';
+      setError(errorMessage || 'An unknown error occurred');
       setSolution(null);
     } finally {
       setIsLoading(false);
