@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.fyp.wspapi.controller.WSPControllerIntegrationTest" time="2.41" tests="11" errors="1" skipped="0" failures="1">
+  <properties>
+    <property name="java.specification.version" value="21"/>
+    <property name="sun.jnu.encoding" value="UTF-8"/>
+    <property name="java.class.path" value="/Users/yassirmaknaoui/git/wsp-backtracker/target/test-classes:/Users/yassirmaknaoui/git/wsp-backtracker/target/classes:/Users/yassirmaknaoui/.m2/repository/org/springframework/boot/spring-boot-starter-web/3.2.0/spring-boot-starter-web-3.2.0.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/boot/spring-boot-starter/3.2.0/spring-boot-starter-3.2.0.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/boot/spring-boot-starter-logging/3.2.0/spring-boot-starter-logging-3.2.0.jar:/Users/yassirmaknaoui/.m2/repository/ch/qos/logback/logback-classic/1.4.11/logback-classic-1.4.11.jar:/Users/yassirmaknaoui/.m2/repository/ch/qos/logback/logback-core/1.4.11/logback-core-1.4.11.jar:/Users/yassirmaknaoui/.m2/repository/org/apache/logging/log4j/log4j-to-slf4j/2.21.1/log4j-to-slf4j-2.21.1.jar:/Users/yassirmaknaoui/.m2/repository/org/apache/logging/log4j/log4j-api/2.21.1/log4j-api-2.21.1.jar:/Users/yassirmaknaoui/.m2/repository/org/slf4j/jul-to-slf4j/2.0.9/jul-to-slf4j-2.0.9.jar:/Users/yassirmaknaoui/.m2/repository/jakarta/annotation/jakarta.annotation-api/2.1.1/jakarta.annotation-api-2.1.1.jar:/Users/yassirmaknaoui/.m2/repository/org/yaml/snakeyaml/2.2/snakeyaml-2.2.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/boot/spring-boot-starter-json/3.2.0/spring-boot-starter-json-3.2.0.jar:/Users/yassirmaknaoui/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.15.3/jackson-databind-2.15.3.jar:/Users/yassirmaknaoui/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.15.3/jackson-annotations-2.15.3.jar:/Users/yassirmaknaoui/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.15.3/jackson-core-2.15.3.jar:/Users/yassirmaknaoui/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jdk8/2.15.3/jackson-datatype-jdk8-2.15.3.jar:/Users/yassirmaknaoui/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jsr310/2.15.3/jackson-datatype-jsr310-2.15.3.jar:/Users/yassirmaknaoui/.m2/repository/com/fasterxml/jackson/module/jackson-module-parameter-names/2.15.3/jackson-module-parameter-names-2.15.3.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/boot/spring-boot-starter-tomcat/3.2.0/spring-boot-starter-tomcat-3.2.0.jar:/Users/yassirmaknaoui/.m2/repository/org/apache/tomcat/embed/tomcat-embed-core/10.1.16/tomcat-embed-core-10.1.16.jar:/Users/yassirmaknaoui/.m2/repository/org/apache/tomcat/embed/tomcat-embed-websocket/10.1.16/tomcat-embed-websocket-10.1.16.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/spring-web/6.1.1/spring-web-6.1.1.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/spring-beans/6.1.1/spring-beans-6.1.1.jar:/Users/yassirmaknaoui/.m2/repository/io/micrometer/micrometer-observation/1.12.0/micrometer-observation-1.12.0.jar:/Users/yassirmaknaoui/.m2/repository/io/micrometer/micrometer-commons/1.12.0/micrometer-commons-1.12.0.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/spring-webmvc/6.1.1/spring-webmvc-6.1.1.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/spring-aop/6.1.1/spring-aop-6.1.1.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/spring-context/6.1.1/spring-context-6.1.1.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/spring-expression/6.1.1/spring-expression-6.1.1.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/boot/spring-boot-starter-validation/3.2.0/spring-boot-starter-validation-3.2.0.jar:/Users/yassirmaknaoui/.m2/repository/org/apache/tomcat/embed/tomcat-embed-el/10.1.16/tomcat-embed-el-10.1.16.jar:/Users/yassirmaknaoui/.m2/repository/org/hibernate/validator/hibernate-validator/8.0.1.Final/hibernate-validator-8.0.1.Final.jar:/Users/yassirmaknaoui/.m2/repository/jakarta/validation/jakarta.validation-api/3.0.2/jakarta.validation-api-3.0.2.jar:/Users/yassirmaknaoui/.m2/repository/org/jboss/logging/jboss-logging/3.5.3.Final/jboss-logging-3.5.3.Final.jar:/Users/yassirmaknaoui/.m2/repository/com/fasterxml/classmate/1.6.0/classmate-1.6.0.jar:/Users/yassirmaknaoui/.m2/repository/com/google/ortools/ortools-java/9.7.2996/ortools-java-9.7.2996.jar:/Users/yassirmaknaoui/.m2/repository/com/google/ortools/ortools-linux-x86-64/9.7.2996/ortools-linux-x86-64-9.7.2996.jar:/Users/yassirmaknaoui/.m2/repository/com/google/ortools/ortools-darwin-x86-64/9.7.2996/ortools-darwin-x86-64-9.7.2996.jar:/Users/yassirmaknaoui/.m2/repository/com/google/ortools/ortools-win32-x86-64/9.7.2996/ortools-win32-x86-64-9.7.2996.jar:/Users/yassirmaknaoui/.m2/repository/com/google/ortools/ortools-linux-aarch64/9.7.2996/ortools-linux-aarch64-9.7.2996.jar:/Users/yassirmaknaoui/.m2/repository/com/google/ortools/ortools-darwin-aarch64/9.7.2996/ortools-darwin-aarch64-9.7.2996.jar:/Users/yassirmaknaoui/.m2/repository/net/java/dev/jna/jna-platform/5.13.0/jna-platform-5.13.0.jar:/Users/yassirmaknaoui/.m2/repository/net/java/dev/jna/jna/5.13.0/jna-5.13.0.jar:/Users/yassirmaknaoui/.m2/repository/com/google/protobuf/protobuf-java/3.23.3/protobuf-java-3.23.3.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/boot/spring-boot-devtools/3.2.0/spring-boot-devtools-3.2.0.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/boot/spring-boot/3.2.0/spring-boot-3.2.0.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/boot/spring-boot-autoconfigure/3.2.0/spring-boot-autoconfigure-3.2.0.jar:/Users/yassirmaknaoui/.m2/repository/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/boot/spring-boot-starter-test/3.2.0/spring-boot-starter-test-3.2.0.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/boot/spring-boot-test/3.2.0/spring-boot-test-3.2.0.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/boot/spring-boot-test-autoconfigure/3.2.0/spring-boot-test-autoconfigure-3.2.0.jar:/Users/yassirmaknaoui/.m2/repository/com/jayway/jsonpath/json-path/2.8.0/json-path-2.8.0.jar:/Users/yassirmaknaoui/.m2/repository/org/slf4j/slf4j-api/2.0.9/slf4j-api-2.0.9.jar:/Users/yassirmaknaoui/.m2/repository/jakarta/xml/bind/jakarta.xml.bind-api/4.0.1/jakarta.xml.bind-api-4.0.1.jar:/Users/yassirmaknaoui/.m2/repository/jakarta/activation/jakarta.activation-api/2.1.2/jakarta.activation-api-2.1.2.jar:/Users/yassirmaknaoui/.m2/repository/net/minidev/json-smart/2.5.0/json-smart-2.5.0.jar:/Users/yassirmaknaoui/.m2/repository/net/minidev/accessors-smart/2.5.0/accessors-smart-2.5.0.jar:/Users/yassirmaknaoui/.m2/repository/org/ow2/asm/asm/9.3/asm-9.3.jar:/Users/yassirmaknaoui/.m2/repository/org/assertj/assertj-core/3.24.2/assertj-core-3.24.2.jar:/Users/yassirmaknaoui/.m2/repository/net/bytebuddy/byte-buddy/1.14.10/byte-buddy-1.14.10.jar:/Users/yassirmaknaoui/.m2/repository/org/awaitility/awaitility/4.2.0/awaitility-4.2.0.jar:/Users/yassirmaknaoui/.m2/repository/org/hamcrest/hamcrest/2.2/hamcrest-2.2.jar:/Users/yassirmaknaoui/.m2/repository/org/junit/jupiter/junit-jupiter/5.10.1/junit-jupiter-5.10.1.jar:/Users/yassirmaknaoui/.m2/repository/org/junit/jupiter/junit-jupiter-params/5.10.1/junit-jupiter-params-5.10.1.jar:/Users/yassirmaknaoui/.m2/repository/org/mockito/mockito-core/5.7.0/mockito-core-5.7.0.jar:/Users/yassirmaknaoui/.m2/repository/net/bytebuddy/byte-buddy-agent/1.14.10/byte-buddy-agent-1.14.10.jar:/Users/yassirmaknaoui/.m2/repository/org/objenesis/objenesis/3.3/objenesis-3.3.jar:/Users/yassirmaknaoui/.m2/repository/org/mockito/mockito-junit-jupiter/5.7.0/mockito-junit-jupiter-5.7.0.jar:/Users/yassirmaknaoui/.m2/repository/org/skyscreamer/jsonassert/1.5.1/jsonassert-1.5.1.jar:/Users/yassirmaknaoui/.m2/repository/com/vaadin/external/google/android-json/0.0.20131108.vaadin1/android-json-0.0.20131108.vaadin1.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/spring-core/6.1.1/spring-core-6.1.1.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/spring-jcl/6.1.1/spring-jcl-6.1.1.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/spring-test/6.1.1/spring-test-6.1.1.jar:/Users/yassirmaknaoui/.m2/repository/org/xmlunit/xmlunit-core/2.9.1/xmlunit-core-2.9.1.jar:/Users/yassirmaknaoui/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.9.2/junit-jupiter-api-5.9.2.jar:/Users/yassirmaknaoui/.m2/repository/org/opentest4j/opentest4j/1.2.0/opentest4j-1.2.0.jar:/Users/yassirmaknaoui/.m2/repository/org/junit/platform/junit-platform-commons/1.10.1/junit-platform-commons-1.10.1.jar:/Users/yassirmaknaoui/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/Users/yassirmaknaoui/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.9.2/junit-jupiter-engine-5.9.2.jar:/Users/yassirmaknaoui/.m2/repository/org/junit/platform/junit-platform-engine/1.10.1/junit-platform-engine-1.10.1.jar:"/>
+    <property name="java.vm.vendor" value="Homebrew"/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="java.vendor.url" value="https://github.com/Homebrew/homebrew-core/issues"/>
+    <property name="user.timezone" value="Europe/London"/>
+    <property name="org.jboss.logging.provider" value="slf4j"/>
+    <property name="os.name" value="Mac OS X"/>
+    <property name="java.vm.specification.version" value="21"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="user.country" value="GB"/>
+    <property name="sun.boot.library.path" value="/opt/homebrew/Cellar/openjdk@21/21.0.4/libexec/openjdk.jdk/Contents/Home/lib"/>
+    <property name="sun.java.command" value="/Users/yassirmaknaoui/git/wsp-backtracker/target/surefire/surefirebooter-20250804192153981_3.jar /Users/yassirmaknaoui/git/wsp-backtracker/target/surefire 2025-08-04T19-21-53_923-jvmRun1 surefire-20250804192153981_1tmp surefire_0-20250804192153981_2tmp"/>
+    <property name="http.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
+    <property name="jdk.debug" value="release"/>
+    <property name="test" value="WSPControllerIntegrationTest"/>
+    <property name="surefire.test.class.path" value="/Users/yassirmaknaoui/git/wsp-backtracker/target/test-classes:/Users/yassirmaknaoui/git/wsp-backtracker/target/classes:/Users/yassirmaknaoui/.m2/repository/org/springframework/boot/spring-boot-starter-web/3.2.0/spring-boot-starter-web-3.2.0.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/boot/spring-boot-starter/3.2.0/spring-boot-starter-3.2.0.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/boot/spring-boot-starter-logging/3.2.0/spring-boot-starter-logging-3.2.0.jar:/Users/yassirmaknaoui/.m2/repository/ch/qos/logback/logback-classic/1.4.11/logback-classic-1.4.11.jar:/Users/yassirmaknaoui/.m2/repository/ch/qos/logback/logback-core/1.4.11/logback-core-1.4.11.jar:/Users/yassirmaknaoui/.m2/repository/org/apache/logging/log4j/log4j-to-slf4j/2.21.1/log4j-to-slf4j-2.21.1.jar:/Users/yassirmaknaoui/.m2/repository/org/apache/logging/log4j/log4j-api/2.21.1/log4j-api-2.21.1.jar:/Users/yassirmaknaoui/.m2/repository/org/slf4j/jul-to-slf4j/2.0.9/jul-to-slf4j-2.0.9.jar:/Users/yassirmaknaoui/.m2/repository/jakarta/annotation/jakarta.annotation-api/2.1.1/jakarta.annotation-api-2.1.1.jar:/Users/yassirmaknaoui/.m2/repository/org/yaml/snakeyaml/2.2/snakeyaml-2.2.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/boot/spring-boot-starter-json/3.2.0/spring-boot-starter-json-3.2.0.jar:/Users/yassirmaknaoui/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.15.3/jackson-databind-2.15.3.jar:/Users/yassirmaknaoui/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.15.3/jackson-annotations-2.15.3.jar:/Users/yassirmaknaoui/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.15.3/jackson-core-2.15.3.jar:/Users/yassirmaknaoui/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jdk8/2.15.3/jackson-datatype-jdk8-2.15.3.jar:/Users/yassirmaknaoui/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jsr310/2.15.3/jackson-datatype-jsr310-2.15.3.jar:/Users/yassirmaknaoui/.m2/repository/com/fasterxml/jackson/module/jackson-module-parameter-names/2.15.3/jackson-module-parameter-names-2.15.3.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/boot/spring-boot-starter-tomcat/3.2.0/spring-boot-starter-tomcat-3.2.0.jar:/Users/yassirmaknaoui/.m2/repository/org/apache/tomcat/embed/tomcat-embed-core/10.1.16/tomcat-embed-core-10.1.16.jar:/Users/yassirmaknaoui/.m2/repository/org/apache/tomcat/embed/tomcat-embed-websocket/10.1.16/tomcat-embed-websocket-10.1.16.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/spring-web/6.1.1/spring-web-6.1.1.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/spring-beans/6.1.1/spring-beans-6.1.1.jar:/Users/yassirmaknaoui/.m2/repository/io/micrometer/micrometer-observation/1.12.0/micrometer-observation-1.12.0.jar:/Users/yassirmaknaoui/.m2/repository/io/micrometer/micrometer-commons/1.12.0/micrometer-commons-1.12.0.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/spring-webmvc/6.1.1/spring-webmvc-6.1.1.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/spring-aop/6.1.1/spring-aop-6.1.1.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/spring-context/6.1.1/spring-context-6.1.1.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/spring-expression/6.1.1/spring-expression-6.1.1.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/boot/spring-boot-starter-validation/3.2.0/spring-boot-starter-validation-3.2.0.jar:/Users/yassirmaknaoui/.m2/repository/org/apache/tomcat/embed/tomcat-embed-el/10.1.16/tomcat-embed-el-10.1.16.jar:/Users/yassirmaknaoui/.m2/repository/org/hibernate/validator/hibernate-validator/8.0.1.Final/hibernate-validator-8.0.1.Final.jar:/Users/yassirmaknaoui/.m2/repository/jakarta/validation/jakarta.validation-api/3.0.2/jakarta.validation-api-3.0.2.jar:/Users/yassirmaknaoui/.m2/repository/org/jboss/logging/jboss-logging/3.5.3.Final/jboss-logging-3.5.3.Final.jar:/Users/yassirmaknaoui/.m2/repository/com/fasterxml/classmate/1.6.0/classmate-1.6.0.jar:/Users/yassirmaknaoui/.m2/repository/com/google/ortools/ortools-java/9.7.2996/ortools-java-9.7.2996.jar:/Users/yassirmaknaoui/.m2/repository/com/google/ortools/ortools-linux-x86-64/9.7.2996/ortools-linux-x86-64-9.7.2996.jar:/Users/yassirmaknaoui/.m2/repository/com/google/ortools/ortools-darwin-x86-64/9.7.2996/ortools-darwin-x86-64-9.7.2996.jar:/Users/yassirmaknaoui/.m2/repository/com/google/ortools/ortools-win32-x86-64/9.7.2996/ortools-win32-x86-64-9.7.2996.jar:/Users/yassirmaknaoui/.m2/repository/com/google/ortools/ortools-linux-aarch64/9.7.2996/ortools-linux-aarch64-9.7.2996.jar:/Users/yassirmaknaoui/.m2/repository/com/google/ortools/ortools-darwin-aarch64/9.7.2996/ortools-darwin-aarch64-9.7.2996.jar:/Users/yassirmaknaoui/.m2/repository/net/java/dev/jna/jna-platform/5.13.0/jna-platform-5.13.0.jar:/Users/yassirmaknaoui/.m2/repository/net/java/dev/jna/jna/5.13.0/jna-5.13.0.jar:/Users/yassirmaknaoui/.m2/repository/com/google/protobuf/protobuf-java/3.23.3/protobuf-java-3.23.3.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/boot/spring-boot-devtools/3.2.0/spring-boot-devtools-3.2.0.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/boot/spring-boot/3.2.0/spring-boot-3.2.0.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/boot/spring-boot-autoconfigure/3.2.0/spring-boot-autoconfigure-3.2.0.jar:/Users/yassirmaknaoui/.m2/repository/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/boot/spring-boot-starter-test/3.2.0/spring-boot-starter-test-3.2.0.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/boot/spring-boot-test/3.2.0/spring-boot-test-3.2.0.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/boot/spring-boot-test-autoconfigure/3.2.0/spring-boot-test-autoconfigure-3.2.0.jar:/Users/yassirmaknaoui/.m2/repository/com/jayway/jsonpath/json-path/2.8.0/json-path-2.8.0.jar:/Users/yassirmaknaoui/.m2/repository/org/slf4j/slf4j-api/2.0.9/slf4j-api-2.0.9.jar:/Users/yassirmaknaoui/.m2/repository/jakarta/xml/bind/jakarta.xml.bind-api/4.0.1/jakarta.xml.bind-api-4.0.1.jar:/Users/yassirmaknaoui/.m2/repository/jakarta/activation/jakarta.activation-api/2.1.2/jakarta.activation-api-2.1.2.jar:/Users/yassirmaknaoui/.m2/repository/net/minidev/json-smart/2.5.0/json-smart-2.5.0.jar:/Users/yassirmaknaoui/.m2/repository/net/minidev/accessors-smart/2.5.0/accessors-smart-2.5.0.jar:/Users/yassirmaknaoui/.m2/repository/org/ow2/asm/asm/9.3/asm-9.3.jar:/Users/yassirmaknaoui/.m2/repository/org/assertj/assertj-core/3.24.2/assertj-core-3.24.2.jar:/Users/yassirmaknaoui/.m2/repository/net/bytebuddy/byte-buddy/1.14.10/byte-buddy-1.14.10.jar:/Users/yassirmaknaoui/.m2/repository/org/awaitility/awaitility/4.2.0/awaitility-4.2.0.jar:/Users/yassirmaknaoui/.m2/repository/org/hamcrest/hamcrest/2.2/hamcrest-2.2.jar:/Users/yassirmaknaoui/.m2/repository/org/junit/jupiter/junit-jupiter/5.10.1/junit-jupiter-5.10.1.jar:/Users/yassirmaknaoui/.m2/repository/org/junit/jupiter/junit-jupiter-params/5.10.1/junit-jupiter-params-5.10.1.jar:/Users/yassirmaknaoui/.m2/repository/org/mockito/mockito-core/5.7.0/mockito-core-5.7.0.jar:/Users/yassirmaknaoui/.m2/repository/net/bytebuddy/byte-buddy-agent/1.14.10/byte-buddy-agent-1.14.10.jar:/Users/yassirmaknaoui/.m2/repository/org/objenesis/objenesis/3.3/objenesis-3.3.jar:/Users/yassirmaknaoui/.m2/repository/org/mockito/mockito-junit-jupiter/5.7.0/mockito-junit-jupiter-5.7.0.jar:/Users/yassirmaknaoui/.m2/repository/org/skyscreamer/jsonassert/1.5.1/jsonassert-1.5.1.jar:/Users/yassirmaknaoui/.m2/repository/com/vaadin/external/google/android-json/0.0.20131108.vaadin1/android-json-0.0.20131108.vaadin1.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/spring-core/6.1.1/spring-core-6.1.1.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/spring-jcl/6.1.1/spring-jcl-6.1.1.jar:/Users/yassirmaknaoui/.m2/repository/org/springframework/spring-test/6.1.1/spring-test-6.1.1.jar:/Users/yassirmaknaoui/.m2/repository/org/xmlunit/xmlunit-core/2.9.1/xmlunit-core-2.9.1.jar:/Users/yassirmaknaoui/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.9.2/junit-jupiter-api-5.9.2.jar:/Users/yassirmaknaoui/.m2/repository/org/opentest4j/opentest4j/1.2.0/opentest4j-1.2.0.jar:/Users/yassirmaknaoui/.m2/repository/org/junit/platform/junit-platform-commons/1.10.1/junit-platform-commons-1.10.1.jar:/Users/yassirmaknaoui/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/Users/yassirmaknaoui/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.9.2/junit-jupiter-engine-5.9.2.jar:/Users/yassirmaknaoui/.m2/repository/org/junit/platform/junit-platform-engine/1.10.1/junit-platform-engine-1.10.1.jar:"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="user.home" value="/Users/yassirmaknaoui"/>
+    <property name="user.language" value="en"/>
+    <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.version.date" value="2024-07-16"/>
+    <property name="java.home" value="/opt/homebrew/Cellar/openjdk@21/21.0.4/libexec/openjdk.jdk/Contents/Home"/>
+    <property name="file.separator" value="/"/>
+    <property name="basedir" value="/Users/yassirmaknaoui/git/wsp-backtracker"/>
+    <property name="java.vm.compressedOopsMode" value="Zero based"/>
+    <property name="line.separator" value="&#10;"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="FILE_LOG_CHARSET" value="UTF-8"/>
+    <property name="java.awt.headless" value="true"/>
+    <property name="apple.awt.application.name" value="ForkedBooter"/>
+    <property name="surefire.real.class.path" value="/Users/yassirmaknaoui/git/wsp-backtracker/target/surefire/surefirebooter-20250804192153981_3.jar"/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="ftp.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
+    <property name="java.runtime.version" value="21.0.4"/>
+    <property name="user.name" value="yassirmaknaoui"/>
+    <property name="stdout.encoding" value="UTF-8"/>
+    <property name="path.separator" value=":"/>
+    <property name="os.version" value="14.5"/>
+    <property name="java.runtime.name" value="OpenJDK Runtime Environment"/>
+    <property name="file.encoding" value="UTF-8"/>
+    <property name="java.vm.name" value="OpenJDK 64-Bit Server VM"/>
+    <property name="java.vendor.version" value="Homebrew"/>
+    <property name="localRepository" value="/Users/yassirmaknaoui/.m2/repository"/>
+    <property name="java.vendor.url.bug" value="https://github.com/Homebrew/homebrew-core/issues"/>
+    <property name="java.io.tmpdir" value="/var/folders/5b/706jnnnj4wd1j65133bsd8cc0000gn/T/"/>
+    <property name="java.version" value="21.0.4"/>
+    <property name="user.dir" value="/Users/yassirmaknaoui/git/wsp-backtracker"/>
+    <property name="os.arch" value="aarch64"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="PID" value="13570"/>
+    <property name="CONSOLE_LOG_CHARSET" value="UTF-8"/>
+    <property name="native.encoding" value="UTF-8"/>
+    <property name="java.library.path" value="/Users/yassirmaknaoui/Library/Java/Extensions:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java:."/>
+    <property name="java.vm.info" value="mixed mode, sharing"/>
+    <property name="stderr.encoding" value="UTF-8"/>
+    <property name="java.vendor" value="Homebrew"/>
+    <property name="java.vm.version" value="21.0.4"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeBig"/>
+    <property name="socksNonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
+    <property name="java.class.version" value="65.0"/>
+    <property name="CONSOLE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss} - %msg%n"/>
+    <property name="LOGGED_APPLICATION_NAME" value="[wsp-solver-api] "/>
+  </properties>
+  <testcase name="testSolveWSP_NoSolution" classname="com.fyp.wspapi.controller.WSPControllerIntegrationTest" time="0.556">
+    <error message="Handler dispatch failed: java.lang.UnsatisfiedLinkError: &apos;long com.google.ortools.util.mainJNI.new_Domain__SWIG_2(long, long)&apos;" type="jakarta.servlet.ServletException"><![CDATA[jakarta.servlet.ServletException: Handler dispatch failed: java.lang.UnsatisfiedLinkError: 'long com.google.ortools.util.mainJNI.new_Domain__SWIG_2(long, long)'
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1104)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at org.springframework.test.web.servlet.TestDispatcherServlet.service(TestDispatcherServlet.java:72)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.springframework.mock.web.MockFilterChain$ServletFilterProxy.doFilter(MockFilterChain.java:165)
+	at org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:132)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.test.web.servlet.setup.MockMvcFilterDecorator.doFilter(MockMvcFilterDecorator.java:151)
+	at org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:132)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.test.web.servlet.setup.MockMvcFilterDecorator.doFilter(MockMvcFilterDecorator.java:151)
+	at org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:132)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.test.web.servlet.setup.MockMvcFilterDecorator.doFilter(MockMvcFilterDecorator.java:151)
+	at org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:132)
+	at org.springframework.test.web.servlet.MockMvc.perform(MockMvc.java:201)
+	at com.fyp.wspapi.controller.WSPControllerIntegrationTest.testSolveWSP_NoSolution(WSPControllerIntegrationTest.java:129)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+Caused by: java.lang.UnsatisfiedLinkError: 'long com.google.ortools.util.mainJNI.new_Domain__SWIG_2(long, long)'
+	at com.google.ortools.util.mainJNI.new_Domain__SWIG_2(Native Method)
+	at com.google.ortools.util.Domain.<init>(Domain.java:80)
+	at com.google.ortools.sat.CpModel.newBoolVar(CpModel.java:89)
+	at WSP.WSPSATEncoder.encodeAndSolve(WSPSATEncoder.java:75)
+	at com.fyp.wspapi.service.WSPService.solveWithSAT(WSPService.java:60)
+	at com.fyp.wspapi.service.WSPService.solveWSP(WSPService.java:30)
+	at com.fyp.wspapi.controller.WSPController.solve(WSPController.java:28)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:254)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:182)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:917)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:829)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	... 26 more
+]]></error>
+    <system-out><![CDATA[19:21:54.512 [main] INFO org.springframework.boot.devtools.restart.RestartApplicationListener -- Restart disabled due to context in which it is running
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.0)
+
+2025-08-04 19:21:54 - Starting WSPControllerIntegrationTest using Java 21.0.4 with PID 13570 (started by yassirmaknaoui in /Users/yassirmaknaoui/git/wsp-backtracker)
+2025-08-04 19:21:54 - No active profile set, falling back to 1 default profile: "default"
+2025-08-04 19:21:55 - Initializing Spring TestDispatcherServlet ''
+2025-08-04 19:21:55 - Initializing Servlet ''
+2025-08-04 19:21:55 - Completed initialization in 1 ms
+2025-08-04 19:21:55 - Started WSPControllerIntegrationTest in 0.794 seconds (process running for 1.278)
+]]></system-out>
+    <system-err><![CDATA[WARNING: A Java agent has been loaded dynamically (/Users/yassirmaknaoui/.m2/repository/net/bytebuddy/byte-buddy-agent/1.14.10/byte-buddy-agent-1.14.10.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+]]></system-err>
+  </testcase>
+  <testcase name="testSolveWSP_Backtracking_WithSolution" classname="com.fyp.wspapi.controller.WSPControllerIntegrationTest" time="0.037"/>
+  <testcase name="testHealthEndpoint" classname="com.fyp.wspapi.controller.WSPControllerIntegrationTest" time="0.003"/>
+  <testcase name="testSolveWSP_CSP_WithSolution" classname="com.fyp.wspapi.controller.WSPControllerIntegrationTest" time="0.759"/>
+  <testcase name="testSolveWSP_PBT_WithSolution" classname="com.fyp.wspapi.controller.WSPControllerIntegrationTest" time="0.003"/>
+  <testcase name="testSolveWSP_LargerProblem" classname="com.fyp.wspapi.controller.WSPControllerIntegrationTest" time="0.014">
+    <failure message="JSON path &quot;$.solutionFound&quot; expected:&lt;true&gt; but was:&lt;false&gt;" type="java.lang.AssertionError"><![CDATA[java.lang.AssertionError: JSON path "$.solutionFound" expected:<true> but was:<false>
+	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:59)
+	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:122)
+	at org.springframework.test.util.JsonPathExpectationsHelper.assertValue(JsonPathExpectationsHelper.java:123)
+	at org.springframework.test.web.servlet.result.JsonPathResultMatchers.lambda$value$2(JsonPathResultMatchers.java:111)
+	at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:214)
+	at com.fyp.wspapi.controller.WSPControllerIntegrationTest.testSolveWSP_LargerProblem(WSPControllerIntegrationTest.java:171)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+]]></failure>
+    <system-out><![CDATA[
+MockHttpServletRequest:
+      HTTP Method = POST
+      Request URI = /api/solve
+       Parameters = {}
+          Headers = [Content-Type:"application/json;charset=UTF-8", Content-Length:"364"]
+             Body = {
+  "numSteps" : 6,
+  "numUsers" : 4,
+  "authorized" : [ [ 1, 1, 0, 1 ], [ 1, 0, 1, 1 ], [ 0, 1, 1, 1 ], [ 1, 1, 1, 0 ], [ 1, 1, 0, 1 ], [ 0, 1, 1, 1 ] ],
+  "mustSameConstraints" : [ {
+    "step1" : 0,
+    "step2" : 2
+  } ],
+  "mustDifferentConstraints" : [ {
+    "step1" : 1,
+    "step2" : 3
+  }, {
+    "step1" : 2,
+    "step2" : 4
+  } ],
+  "solverType" : "SAT"
+}
+    Session Attrs = {}
+
+Handler:
+             Type = com.fyp.wspapi.controller.WSPController
+           Method = com.fyp.wspapi.controller.WSPController#solve(WSPRequest)
+
+Async:
+    Async started = false
+     Async result = null
+
+Resolved Exception:
+             Type = null
+
+ModelAndView:
+        View name = null
+             View = null
+            Model = null
+
+FlashMap:
+       Attributes = null
+
+MockHttpServletResponse:
+           Status = 200
+    Error message = null
+          Headers = [Content-Type:"application/json"]
+     Content type = application/json
+             Body = {
+  "solutionFound" : false,
+  "assignment" : null,
+  "message" : "Error: Index 4 out of bounds for length 4",
+  "solvingTimeMs" : 0,
+  "solverUsed" : "NONE"
+}
+    Forwarded URL = null
+   Redirected URL = null
+          Cookies = []
+]]></system-out>
+  </testcase>
+  <testcase name="testSolversEndpoint" classname="com.fyp.wspapi.controller.WSPControllerIntegrationTest" time="0.008"/>
+  <testcase name="testSolveWSP_SAT_WithSolution" classname="com.fyp.wspapi.controller.WSPControllerIntegrationTest" time="0.006"/>
+  <testcase name="testSolveWSP_InvalidRequest_MissingFields" classname="com.fyp.wspapi.controller.WSPControllerIntegrationTest" time="0.009">
+    <system-out><![CDATA[2025-08-04 19:21:56 - Resolved [org.springframework.web.bind.MethodArgumentNotValidException: Validation failed for argument [0] in public org.springframework.http.ResponseEntity<com.fyp.wspapi.dto.WSPResponse> com.fyp.wspapi.controller.WSPController.solve(com.fyp.wspapi.dto.WSPRequest) with 4 errors: [Field error in object 'WSPRequest' on field 'authorized': rejected value [null]; codes [NotNull.WSPRequest.authorized,NotNull.authorized,NotNull.[[I,NotNull]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [WSPRequest.authorized,authorized]; arguments []; default message [authorized]]; default message [must not be null]] [Field error in object 'WSPRequest' on field 'numUsers': rejected value [null]; codes [NotNull.WSPRequest.numUsers,NotNull.numUsers,NotNull.java.lang.Integer,NotNull]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [WSPRequest.numUsers,numUsers]; arguments []; default message [numUsers]]; default message [must not be null]] [Field error in object 'WSPRequest' on field 'numSteps': rejected value [null]; codes [NotNull.WSPRequest.numSteps,NotNull.numSteps,NotNull.java.lang.Integer,NotNull]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [WSPRequest.numSteps,numSteps]; arguments []; default message [numSteps]]; default message [must not be null]] [Field error in object 'WSPRequest' on field 'solverType': rejected value [null]; codes [NotNull.WSPRequest.solverType,NotNull.solverType,NotNull.java.lang.String,NotNull]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [WSPRequest.solverType,solverType]; arguments []; default message [solverType]]; default message [must not be null]] ]
+]]></system-out>
+  </testcase>
+  <testcase name="testSolveWSP_WithConstraints" classname="com.fyp.wspapi.controller.WSPControllerIntegrationTest" time="0.005"/>
+  <testcase name="testSolveWSP_InvalidSolver" classname="com.fyp.wspapi.controller.WSPControllerIntegrationTest" time="0.004"/>
+</testsuite>

@@ -1,0 +1,82 @@
+-------------------------------------------------------------------------------
+Test set: com.fyp.wspapi.service.WSPServiceTest
+-------------------------------------------------------------------------------
+Tests run: 12, Failures: 0, Errors: 6, Skipped: 0, Time elapsed: 1.596 s <<< FAILURE! -- in com.fyp.wspapi.service.WSPServiceTest
+com.fyp.wspapi.service.WSPServiceTest.testSolveWSP_NoSolution -- Time elapsed: 0.541 s <<< ERROR!
+java.lang.UnsatisfiedLinkError: 'long com.google.ortools.util.mainJNI.new_Domain__SWIG_2(long, long)'
+	at com.google.ortools.util.mainJNI.new_Domain__SWIG_2(Native Method)
+	at com.google.ortools.util.Domain.<init>(Domain.java:80)
+	at com.google.ortools.sat.CpModel.newBoolVar(CpModel.java:89)
+	at WSP.WSPSATEncoder.encodeAndSolve(WSPSATEncoder.java:75)
+	at com.fyp.wspapi.service.WSPService.solveWithSAT(WSPService.java:60)
+	at com.fyp.wspapi.service.WSPService.solveWSP(WSPService.java:30)
+	at com.fyp.wspapi.service.WSPServiceTest.testSolveWSP_NoSolution(WSPServiceTest.java:172)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+com.fyp.wspapi.service.WSPServiceTest.testSolveWSP_PerformanceComparison -- Time elapsed: 0.002 s <<< ERROR!
+java.lang.UnsatisfiedLinkError: 'long com.google.ortools.util.mainJNI.new_Domain__SWIG_2(long, long)'
+	at com.google.ortools.util.mainJNI.new_Domain__SWIG_2(Native Method)
+	at com.google.ortools.util.Domain.<init>(Domain.java:80)
+	at com.google.ortools.sat.CpModel.newBoolVar(CpModel.java:89)
+	at WSP.WSPSATEncoder.encodeAndSolve(WSPSATEncoder.java:75)
+	at com.fyp.wspapi.service.WSPService.solveWithSAT(WSPService.java:60)
+	at com.fyp.wspapi.service.WSPService.solveWSP(WSPService.java:30)
+	at com.fyp.wspapi.service.WSPServiceTest.testSolveWSP_PerformanceComparison(WSPServiceTest.java:252)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+com.fyp.wspapi.service.WSPServiceTest.testSolveWSP_SAT_Success -- Time elapsed: 0.002 s <<< ERROR!
+java.lang.UnsatisfiedLinkError: 'long com.google.ortools.util.mainJNI.new_Domain__SWIG_2(long, long)'
+	at com.google.ortools.util.mainJNI.new_Domain__SWIG_2(Native Method)
+	at com.google.ortools.util.Domain.<init>(Domain.java:80)
+	at com.google.ortools.sat.CpModel.newBoolVar(CpModel.java:89)
+	at WSP.WSPSATEncoder.encodeAndSolve(WSPSATEncoder.java:75)
+	at com.fyp.wspapi.service.WSPService.solveWithSAT(WSPService.java:60)
+	at com.fyp.wspapi.service.WSPService.solveWSP(WSPService.java:30)
+	at com.fyp.wspapi.service.WSPServiceTest.testSolveWSP_SAT_Success(WSPServiceTest.java:31)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+com.fyp.wspapi.service.WSPServiceTest.testSolveWSP_WithBothConstraintTypes -- Time elapsed: 0.002 s <<< ERROR!
+java.lang.UnsatisfiedLinkError: 'long com.google.ortools.util.mainJNI.new_Domain__SWIG_2(long, long)'
+	at com.google.ortools.util.mainJNI.new_Domain__SWIG_2(Native Method)
+	at com.google.ortools.util.Domain.<init>(Domain.java:80)
+	at com.google.ortools.sat.CpModel.newBoolVar(CpModel.java:89)
+	at WSP.WSPSATEncoder.encodeAndSolve(WSPSATEncoder.java:75)
+	at com.fyp.wspapi.service.WSPService.solveWithSAT(WSPService.java:60)
+	at com.fyp.wspapi.service.WSPService.solveWSP(WSPService.java:30)
+	at com.fyp.wspapi.service.WSPServiceTest.testSolveWSP_WithBothConstraintTypes(WSPServiceTest.java:145)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+com.fyp.wspapi.service.WSPServiceTest.testSolveWSP_LargerProblem -- Time elapsed: 0.002 s <<< ERROR!
+java.lang.UnsatisfiedLinkError: 'long com.google.ortools.util.mainJNI.new_Domain__SWIG_2(long, long)'
+	at com.google.ortools.util.mainJNI.new_Domain__SWIG_2(Native Method)
+	at com.google.ortools.util.Domain.<init>(Domain.java:80)
+	at com.google.ortools.sat.CpModel.newBoolVar(CpModel.java:89)
+	at WSP.WSPSATEncoder.encodeAndSolve(WSPSATEncoder.java:75)
+	at com.fyp.wspapi.service.WSPService.solveWithSAT(WSPService.java:60)
+	at com.fyp.wspapi.service.WSPService.solveWSP(WSPService.java:30)
+	at com.fyp.wspapi.service.WSPServiceTest.testSolveWSP_LargerProblem(WSPServiceTest.java:214)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+com.fyp.wspapi.service.WSPServiceTest.testSolveWSP_WithMustSameConstraints -- Time elapsed: 0.002 s <<< ERROR!
+java.lang.UnsatisfiedLinkError: 'long com.google.ortools.util.mainJNI.new_Domain__SWIG_2(long, long)'
+	at com.google.ortools.util.mainJNI.new_Domain__SWIG_2(Native Method)
+	at com.google.ortools.util.Domain.<init>(Domain.java:80)
+	at com.google.ortools.sat.CpModel.newBoolVar(CpModel.java:89)
+	at WSP.WSPSATEncoder.encodeAndSolve(WSPSATEncoder.java:75)
+	at com.fyp.wspapi.service.WSPService.solveWithSAT(WSPService.java:60)
+	at com.fyp.wspapi.service.WSPService.solveWSP(WSPService.java:30)
+	at com.fyp.wspapi.service.WSPServiceTest.testSolveWSP_WithMustSameConstraints(WSPServiceTest.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
