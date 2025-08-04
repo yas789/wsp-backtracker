@@ -36,11 +36,10 @@ import {
   Badge
 } from '@chakra-ui/react';
 import { TimeIcon, RepeatIcon, InfoOutlineIcon, CheckCircleIcon } from '@chakra-ui/icons';
-import { WSPRequest, WSPResponse } from '../types/wsp';
-import { Constraint } from './ConstraintsPage';
+import { WSPRequest, WSPResponse, Constraint } from '@/types/wsp';
 import { solveWSP } from '../api/wspApi';
 
-type ConstraintType = 'BINDING' | 'SEPARATION';
+// Constraint type is now imported from wsp.ts
 
 interface Solution {
   assignment: number[]; // Array where index is step and value is assigned user
@@ -112,7 +111,7 @@ const AlgorithmPage = () => {
     }
   }, [stepsCount, usersCount, authMatrix.length, navigate, toast]);
 
-  const solveWSP = async () => {
+  const handleSolveWSP = async () => {
     setIsSolving(true);
     setSolution(null);
 
@@ -125,24 +124,44 @@ const AlgorithmPage = () => {
       
       // Convert frontend constraints to backend format
       constraints.forEach((constraint: Constraint) => {
-        if (constraint.steps && constraint.steps.length >= 2) {
-          // For each pair of steps in the constraint
-          for (let i = 0; i < constraint.steps.length - 1; i++) {
-            const step1 = constraint.steps[i];
-            const step2 = constraint.steps[i + 1];
+        if (!constraint || !constraint.steps || !Array.isArray(constraint.steps)) {
+          console.warn('Invalid constraint structure:', constraint);
+          return;
+        }
+        
+        if (constraint.steps.length >= 2) {
+          // Filter out null/undefined values and ensure all are numbers
+          const validSteps = constraint.steps.filter(step => 
+            step !== null && step !== undefined && typeof step === 'number' && !isNaN(step)
+          );
+          
+          if (validSteps.length < 2) {
+            console.warn('Constraint has insufficient valid steps:', { constraint, validSteps });
+            return;
+          }
+          
+          // For each pair of valid steps in the constraint
+          for (let i = 0; i < validSteps.length - 1; i++) {
+            const step1 = validSteps[i];
+            const step2 = validSteps[i + 1];
             
-            // Ensure steps are valid numbers
-            if (typeof step1 !== 'number' || typeof step2 !== 'number') {
-              console.error('Invalid step values:', { step1, step2, constraint });
+            // Double-check step validity (should be redundant after filtering)
+            if (typeof step1 !== 'number' || typeof step2 !== 'number' || 
+                isNaN(step1) || isNaN(step2) || step1 < 0 || step2 < 0) {
+              console.warn('Skipping invalid step pair:', { step1, step2, constraint });
               continue;
             }
             
-            if (constraint.type === 'BINDING') {
+            if (constraint.type === 'BOD') {
               mustSameConstraints.push({ step1, step2 });
-            } else if (constraint.type === 'SEPARATION') {
+            } else if (constraint.type === 'SOD') {
               mustDifferentConstraints.push({ step1, step2 });
+            } else {
+              console.warn('Unknown constraint type:', constraint.type);
             }
           }
+        } else {
+          console.warn('Constraint has insufficient steps:', constraint);
         }
       });
       
@@ -199,7 +218,7 @@ const AlgorithmPage = () => {
   };
 
   const viewSolution = (solutionData: WSPResponse) => {
-    setSolution(solutionData);
+    setCurrentSolution(solutionData);
     onOpen();
   };
 
@@ -269,7 +288,7 @@ const AlgorithmPage = () => {
             <HStack spacing={4} mt={4}>
               <Button 
                 colorScheme="blue" 
-                onClick={solveWSP}
+                onClick={handleSolveWSP}
                 isLoading={isSolving}
                 loadingText="Solving..."
                 leftIcon={<RepeatIcon />}
@@ -409,32 +428,28 @@ const AlgorithmPage = () => {
               <Box>
                 <HStack mb={4}>
                   <Badge 
-                    colorScheme={currentSolution.isComplete ? 'green' : 'yellow'} 
+                    colorScheme={currentSolution.solutionFound ? 'green' : 'yellow'} 
                     fontSize="0.9em"
                   >
-                    {currentSolution.isComplete ? 'Complete Solution' : 'Partial Solution'}
+                    {currentSolution.solutionFound ? 'Solution Found' : 'No Solution'}
                   </Badge>
                   
-                  {currentSolution.stats && (
-                    <Text fontSize="sm" color="gray.500">
-                      {currentSolution.stats.executionTime.toFixed(2)} ms • 
-                      {currentSolution.stats.nodesVisited} nodes • 
-                      {currentSolution.stats.backtracks} backtracks
-                    </Text>
-                  )}
+                  <Text fontSize="sm" color="gray.500">
+                    {currentSolution.solvingTimeMs} ms • {currentSolution.solverUsed}
+                  </Text>
                 </HStack>
                 
                 {renderSolutionTable(currentSolution)}
                 
-                {currentSolution.isComplete ? (
+                {currentSolution.solutionFound ? (
                   <Alert status="success" mt={4} borderRadius="md">
                     <AlertIcon />
-                    This is a complete solution that satisfies all constraints.
+                    This solution satisfies all constraints.
                   </Alert>
                 ) : (
                   <Alert status="warning" mt={4} borderRadius="md">
                     <AlertIcon />
-                    This is a partial solution that may not satisfy all constraints.
+                    No valid solution was found for the given constraints.
                   </Alert>
                 )}
               </Box>

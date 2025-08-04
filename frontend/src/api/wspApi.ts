@@ -5,7 +5,7 @@ const API_BASE_URL = 'http://localhost:8080/api';
 
 // Individual API functions
 export const solveWSP = async (request: WSPRequest): Promise<WSPResponse> => {
-  const response = await axios.post<WSPResponse>(`${API_BASE_URL}/wsp/solve`, request);
+  const response = await axios.post<WSPResponse>(`${API_BASE_URL}/solve`, request);
   return response.data;
 };
 
