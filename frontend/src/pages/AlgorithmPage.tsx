@@ -22,6 +22,7 @@ import {
   ModalHeader, 
   ModalBody, 
   ModalCloseButton,
+  ModalFooter,
   useDisclosure,
   useToast,
   Stat,
@@ -31,14 +32,15 @@ import {
   StatGroup,
   Tooltip,
   IconButton,
-  Code
+  Code,
+  Badge
 } from '@chakra-ui/react';
 import { TimeIcon, RepeatIcon, InfoOutlineIcon, CheckCircleIcon } from '@chakra-ui/icons';
 import { WSPRequest, WSPResponse } from '../types/wsp';
 import { Constraint } from './ConstraintsPage';
-import { wspApi } from '../api/wspApi';
+import { solveWSP } from '../api/wspApi';
 
-type ConstraintType = 'BOD' | 'SOD';
+type ConstraintType = 'BINDING' | 'SEPARATION';
 
 interface Solution {
   assignment: number[]; // Array where index is step and value is assigned user
@@ -53,6 +55,8 @@ const AlgorithmPage = () => {
   const [availableSolvers, setAvailableSolvers] = useState<string[]>(['SAT', 'CSP', 'BACKTRACKING', 'PBT']);
   const [isSolving, setIsSolving] = useState<boolean>(false);
   const [solution, setSolution] = useState<WSPResponse | null>(null);
+  const [solutions, setSolutions] = useState<WSPResponse[]>([]);
+  const [currentSolution, setCurrentSolution] = useState<WSPResponse | null>(null);
   const [executionHistory, setExecutionHistory] = useState<WSPResponse[]>([]);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate();
@@ -70,7 +74,8 @@ const AlgorithmPage = () => {
   useEffect(() => {
     const loadSolvers = async () => {
       try {
-        const solvers = await wspApi.getSupportedSolvers();
+        // For now, use default solvers since getSupportedSolvers API doesn't exist yet
+        const solvers = ['SAT', 'CSP', 'BACKTRACKING', 'PBT'];
         setAvailableSolvers(solvers);
         if (solvers.length > 0 && !solvers.includes(selectedAlgorithm)) {
           setSelectedAlgorithm(solvers[0]);
@@ -132,9 +137,9 @@ const AlgorithmPage = () => {
               continue;
             }
             
-            if (constraint.type === 'BOD') {
+            if (constraint.type === 'BINDING') {
               mustSameConstraints.push({ step1, step2 });
-            } else if (constraint.type === 'SOD') {
+            } else if (constraint.type === 'SEPARATION') {
               mustDifferentConstraints.push({ step1, step2 });
             }
           }
@@ -159,7 +164,7 @@ const AlgorithmPage = () => {
       console.log('Sending request:', JSON.stringify(request, null, 2));
 
       // Call the backend API using the wspApi client
-      const response = await wspApi.solveWSP(request);
+      const response = await solveWSP(request);
       
       console.log('Received response:', JSON.stringify(response, null, 2));
 
@@ -217,7 +222,7 @@ const AlgorithmPage = () => {
           </Tr>
         </Thead>
         <Tbody>
-          {solutionData.assignment.map((userId, stepIndex) => (
+          {solutionData.assignment.map((userId: number, stepIndex: number) => (
             <Tr key={stepIndex}>
               <Td>Step {stepIndex}</Td>
               <Td>User {userId}</Td>
