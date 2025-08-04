@@ -1,70 +1,59 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Box, 
+  Button, 
   VStack, 
   HStack, 
-  Heading, 
   Text, 
-  Button, 
   Select, 
-  useToast, 
+  Spinner, 
+  Alert, 
+  AlertIcon, 
   Table, 
   Thead, 
   Tbody, 
   Tr, 
   Th, 
   Td, 
-  Code, 
-  Badge, 
-  Progress, 
-  Alert, 
-  AlertIcon,
-  AlertTitle,
-  AlertDescription,
-  useDisclosure,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
+  Modal, 
+  ModalOverlay, 
+  ModalContent, 
+  ModalHeader, 
+  ModalBody, 
   ModalCloseButton,
-  Tooltip,
-  IconButton,
-  Divider,
+  useDisclosure,
+  useToast,
   Stat,
   StatLabel,
   StatNumber,
   StatHelpText,
-  StatArrow,
   StatGroup,
-  SimpleGrid
+  Tooltip,
+  IconButton,
+  Code
 } from '@chakra-ui/react';
-import { RepeatIcon, InfoOutlineIcon, CheckCircleIcon, WarningIcon, TimeIcon } from '@chakra-ui/icons';
-import apiClient from '../services/api';
+import { TimeIcon, RepeatIcon, InfoOutlineIcon, CheckCircleIcon } from '@chakra-ui/icons';
+import { WSPRequest, WSPResponse } from '../types/wsp';
 import { Constraint } from './ConstraintsPage';
+import { wspApi } from '../api/wspApi';
+
+type ConstraintType = 'BOD' | 'SOD';
 
 interface Solution {
-  assignment: Record<number, number>; // step -> user
-  isComplete: boolean;
-  stats?: {
-    executionTime: number;
-    nodesVisited: number;
-    backtracks: number;
-  };
+  assignment: number[]; // Array where index is step and value is assigned user
+  solutionFound: boolean;
+  solvingTimeMs: number;
+  solverUsed: string;
+  message: string;
 }
 
 const AlgorithmPage = () => {
-  const [selectedAlgorithm, setSelectedAlgorithm] = useState<string>('csp');
+  const [selectedAlgorithm, setSelectedAlgorithm] = useState<string>('SAT');
+  const [availableSolvers, setAvailableSolvers] = useState<string[]>(['SAT', 'CSP', 'BACKTRACKING', 'PBT']);
   const [isSolving, setIsSolving] = useState<boolean>(false);
-  const [solutions, setSolutions] = useState<Solution[]>([]);
-  const [currentSolution, setCurrentSolution] = useState<Solution | null>(null);
-  const [executionStats, setExecutionStats] = useState<{
-    totalTime: number;
-    totalSolutions: number;
-    averageTime: number;
-  } | null>(null);
+  const [solution, setSolution] = useState<WSPResponse | null>(null);
+  const [executionHistory, setExecutionHistory] = useState<WSPResponse[]>([]);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate();
   const toast = useToast();
@@ -76,6 +65,24 @@ const AlgorithmPage = () => {
 
   const stepsCount = wspConfig.steps || 0;
   const usersCount = wspConfig.users || 0;
+
+  // Load available solvers on component mount
+  useEffect(() => {
+    const loadSolvers = async () => {
+      try {
+        const solvers = await wspApi.getSupportedSolvers();
+        setAvailableSolvers(solvers);
+        if (solvers.length > 0 && !solvers.includes(selectedAlgorithm)) {
+          setSelectedAlgorithm(solvers[0]);
+        }
+      } catch (error) {
+        console.error('Failed to load solvers:', error);
+        // Use default solvers if API call fails
+        setAvailableSolvers(['SAT', 'CSP', 'BACKTRACKING', 'PBT']);
+      }
+    };
+    loadSolvers();
+  }, [selectedAlgorithm]);
 
   // Check if we have all required data
   useEffect(() => {
@@ -97,23 +104,12 @@ const AlgorithmPage = () => {
         isClosable: true,
       });
       navigate('/auth');
-    } else if (constraints.length === 0) {
-      toast({
-        title: 'Constraints required',
-        description: 'Please define at least one constraint.',
-        status: 'warning',
-        duration: 5000,
-        isClosable: true,
-      });
-      navigate('/constraints');
     }
-  }, [stepsCount, usersCount, authMatrix.length, constraints.length, navigate, toast]);
+  }, [stepsCount, usersCount, authMatrix.length, navigate, toast]);
 
   const solveWSP = async () => {
     setIsSolving(true);
-    setSolutions([]);
-    setCurrentSolution(null);
-    setExecutionStats(null);
+    setSolution(null);
 
     try {
       // Transform constraints to backend format
@@ -136,90 +132,58 @@ const AlgorithmPage = () => {
               continue;
             }
             
-            if (constraint.type === 'binding') {
-              mustSameConstraints.push({ 
-                step1: Number(step1), 
-                step2: Number(step2) 
-              });
-            } else if (constraint.type === 'separation') {
-              mustDifferentConstraints.push({ 
-                step1: Number(step1), 
-                step2: Number(step2) 
-              });
+            if (constraint.type === 'BOD') {
+              mustSameConstraints.push({ step1, step2 });
+            } else if (constraint.type === 'SOD') {
+              mustDifferentConstraints.push({ step1, step2 });
             }
           }
         }
       });
       
-      console.log('Transformed constraints:', { 
-        mustSameConstraints, 
-        mustDifferentConstraints 
+      console.log('Transformed constraints:', {
+        mustSameConstraints,
+        mustDifferentConstraints
       });
 
-      // Ensure solver type is in the correct case for backend
-      const solverType = selectedAlgorithm.toUpperCase() as 'CSP' | 'SAT' | 'BACKTRACKING' | 'PBT';
-      
-      // Prepare the request according to backend's WSPRequest
+      // Prepare the request matching backend's WSPRequest structure
       const request = {
         numSteps: stepsCount,
         numUsers: usersCount,
         authorized: authMatrix,
         mustSameConstraints,
         mustDifferentConstraints,
-        solverType
+        solverType: selectedAlgorithm as 'SAT' | 'CSP' | 'BACKTRACKING' | 'PBT'
       };
+
+      console.log('Sending request:', JSON.stringify(request, null, 2));
+
+      // Call the backend API using the wspApi client
+      const response = await wspApi.solveWSP(request);
       
-      console.log('Using solver type:', solverType);
+      console.log('Received response:', JSON.stringify(response, null, 2));
 
-      const response = await apiClient.post('/wsp/solve', request);
+      // Update solution and history
+      setSolution(response);
+      setExecutionHistory(prev => [...prev, response]);
 
-      // Transform backend response to frontend format
-      if (response.data) {
-        const backendResponse = response.data;
-        
-        // Convert the backend's assignment array to our frontend format
-        const assignment: Record<number, number> = {};
-        if (backendResponse.assignment) {
-          backendResponse.assignment.forEach((userId: number, stepIndex: number) => {
-            if (userId >= 0) { // -1 typically means no assignment
-              assignment[stepIndex] = userId;
-            }
-          });
-        }
+      // Show toast notification
+      toast({
+        title: response.solutionFound ? 'Solution found!' : 'No solution found',
+        description: response.solutionFound 
+          ? `${response.solverUsed} found a solution in ${response.solvingTimeMs}ms` 
+          : response.message || 'No valid assignment found with the given constraints.',
+        status: response.solutionFound ? 'success' : 'warning',
+        duration: 5000,
+        isClosable: true,
+      });
 
-        const solution = {
-          assignment,
-          isComplete: backendResponse.solutionFound || false,
-          stats: {
-            executionTime: backendResponse.solvingTimeMs || 0,
-            nodesVisited: 0, // Not provided by backend
-            backtracks: 0    // Not provided by backend
-          }
-        };
-        
-        setSolutions([solution]);
-        
-        // Set execution stats
-        setExecutionStats({
-          totalTime: backendResponse.solvingTimeMs || 0,
-          totalSolutions: backendResponse.solutionFound ? 1 : 0,
-          averageTime: backendResponse.solvingTimeMs || 0
-        });
-
-        toast({
-          title: 'Solution found',
-          description: `Found solution`,
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
-      }
     } catch (error: any) {
       console.error('Error solving WSP:', error);
       
       toast({
         title: 'Error',
-        description: error.response?.data?.message || 'Failed to solve the WSP instance',
+        description: error.response?.data?.message || error.message || 'An error occurred while solving the problem.',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -229,16 +193,23 @@ const AlgorithmPage = () => {
     }
   };
 
-  const viewSolution = (solution: Solution) => {
-    setCurrentSolution(solution);
+  const viewSolution = (solutionData: WSPResponse) => {
+    setSolution(solutionData);
     onOpen();
   };
 
-  const renderSolutionTable = (solution: Solution) => {
-    if (!solution) return null;
+  const renderSolutionTable = (solutionData: WSPResponse) => {
+    if (!solutionData.solutionFound || !solutionData.assignment || solutionData.assignment.length === 0) {
+      return (
+        <Alert status="warning">
+          <AlertIcon />
+          {solutionData.message || 'No assignment data available'}
+        </Alert>
+      );
+    }
 
     return (
-      <Table variant="simple" size="sm" mt={4}>
+      <Table variant="simple" size="sm">
         <Thead>
           <Tr>
             <Th>Step</Th>
@@ -246,10 +217,10 @@ const AlgorithmPage = () => {
           </Tr>
         </Thead>
         <Tbody>
-          {Object.entries(solution.assignment).map(([step, user]) => (
-            <Tr key={`${step}-${user}`}>
-              <Td>Step {step}</Td>
-              <Td>User {user}</Td>
+          {solutionData.assignment.map((userId, stepIndex) => (
+            <Tr key={stepIndex}>
+              <Td>Step {stepIndex}</Td>
+              <Td>User {userId}</Td>
             </Tr>
           ))}
         </Tbody>
@@ -260,7 +231,7 @@ const AlgorithmPage = () => {
   if (stepsCount === 0 || usersCount === 0) {
     return (
       <Box p={6}>
-        <Heading size="lg" mb={4}>WSP Solver</Heading>
+        <Text fontSize="xl" fontWeight="bold" mb={4}>WSP Solver</Text>
         <Text>Please complete the configuration first.</Text>
       </Box>
     );
@@ -269,7 +240,7 @@ const AlgorithmPage = () => {
   return (
     <Box p={6}>
       <VStack spacing={6} align="stretch">
-        <Heading size="lg">Solve Workflow</Heading>
+        <Text fontSize="xl" fontWeight="bold">Solve Workflow</Text>
         
         <Box bg="white" p={6} borderRadius="lg" boxShadow="sm">
           <VStack spacing={4} align="stretch">
@@ -280,10 +251,10 @@ const AlgorithmPage = () => {
                 onChange={(e) => setSelectedAlgorithm(e.target.value)}
                 isDisabled={isSolving}
               >
-                <option value="csp">CSP Solver (Constraint Satisfaction)</option>
-                <option value="sat">SAT Solver (Boolean Satisfiability)</option>
-                <option value="backtracking">Standard Backtracking</option>
-                <option value="pbt">Pattern-Based Backtracking</option>
+                <option value="SAT">SAT Solver (Boolean Satisfiability)</option>
+                <option value="CSP">CSP Solver (Constraint Satisfaction)</option>
+                <option value="BACKTRACKING">Standard Backtracking</option>
+                <option value="PBT">Pattern-Based Backtracking</option>
               </Select>
               <Text fontSize="sm" color="gray.500" mt={1}>
                 Select the constraint satisfaction algorithm to use
@@ -298,7 +269,7 @@ const AlgorithmPage = () => {
                 loadingText="Solving..."
                 leftIcon={<RepeatIcon />}
               >
-                {solutions.length > 0 ? 'Re-solve' : 'Solve'}
+                {solution ? 'Re-solve' : 'Solve'}
               </Button>
               
               <Tooltip label="Run the algorithm with the current configuration">
@@ -315,107 +286,80 @@ const AlgorithmPage = () => {
         {isSolving && (
           <Box mt={6}>
             <Text mb={2}>Solving the Workflow Satisfiability Problem...</Text>
-            <Progress size="xs" isIndeterminate />
-          </Box>
-        )}
-
-        {executionStats && (
-          <Box mt={6} p={4} bg="blue.50" borderRadius="md">
-            <Heading size="md" mb={4}>Execution Statistics</Heading>
-            <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
-              <Stat>
-                <StatLabel>Total Solutions</StatLabel>
-                <StatNumber>{executionStats.totalSolutions}</StatNumber>
-                <StatHelpText>
-                  <StatArrow type="increase" />
-                  {executionStats.totalSolutions} found
-                </StatHelpText>
-              </Stat>
-              
-              <Stat>
-                <StatLabel>Total Execution Time</StatLabel>
-                <StatNumber>{executionStats.totalTime.toFixed(2)} ms</StatNumber>
-                <StatHelpText>
-                  <StatArrow type="decrease" />
-                  {executionStats.averageTime.toFixed(2)} ms avg per solution
-                </StatHelpText>
-              </Stat>
-              
-              <Stat>
-                <StatLabel>Algorithm</StatLabel>
-                <StatNumber textTransform="capitalize">{selectedAlgorithm}</StatNumber>
-                <StatHelpText>
-                  <TimeIcon mr={1} />
-                  {new Date().toLocaleString()}
-                </StatHelpText>
-              </Stat>
-            </SimpleGrid>
-          </Box>
-        )}
-
-        {solutions.length > 0 && (
-          <Box mt={6}>
-            <HStack justify="space-between" mb={4}>
-              <Heading size="md">Solutions</Heading>
-              <Badge colorScheme="green" fontSize="0.9em">
-                {solutions.length} solution(s) found
-              </Badge>
-            </HStack>
-            
-            <Box overflowX="auto">
-              <Table variant="simple">
-                <Thead>
-                  <Tr>
-                    <Th>#</Th>
-                    <Th>Status</Th>
-                    <Th>Assignment</Th>
-                    <Th>Actions</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {solutions.map((solution, index) => (
-                    <Tr key={index}>
-                      <Td>{index + 1}</Td>
-                      <Td>
-                        <Badge 
-                          colorScheme={solution.isComplete ? 'green' : 'yellow'} 
-                          variant="subtle"
-                        >
-                          {solution.isComplete ? 'Complete' : 'Partial'}
-                        </Badge>
-                      </Td>
-                      <Td>
-                        <Code>
-                          {Object.entries(solution.assignment)
-                            .map(([step, user]) => `S${step}:U${user}`)
-                            .join(', ')}
-                        </Code>
-                      </Td>
-                      <Td>
-                        <Button
-                          size="sm"
-                          onClick={() => viewSolution(solution)}
-                          leftIcon={<InfoOutlineIcon />}
-                        >
-                          Details
-                        </Button>
-                      </Td>
-                    </Tr>
-                  ))}
-                </Tbody>
-              </Table>
+            <Box h="4px" bg="blue.100" borderRadius="full" overflow="hidden">
+              <Box h="100%" bg="blue.500" w="100%" position="relative" />
             </Box>
           </Box>
         )}
 
-        {solutions.length === 0 && !isSolving && (
+        {solution && (
+          <Box mt={6} p={4} bg="blue.50" borderRadius="md">
+            <Text fontSize="lg" fontWeight="bold" mb={4}>Execution Result</Text>
+            <VStack align="stretch" spacing={4}>
+              <Box>
+                <Text fontWeight="medium">Status</Text>
+                <Box 
+                  display="inline-flex" 
+                  alignItems="center" 
+                  px={2} 
+                  py={1} 
+                  borderRadius="md"
+                  bg={solution.solutionFound ? 'green.100' : 'yellow.100'}
+                  color={solution.solutionFound ? 'green.800' : 'yellow.800'}
+                >
+                  {solution.solutionFound ? 'Solution Found' : 'No Solution Found'}
+                </Box>
+              </Box>
+              
+              <Box>
+                <Text fontWeight="medium">Algorithm</Text>
+                <Text>{solution.solverUsed}</Text>
+              </Box>
+              
+              <Box>
+                <Text fontWeight="medium">Execution Time</Text>
+                <Text>{solution.solvingTimeMs} ms</Text>
+              </Box>
+              
+              {solution.message && (
+                <Box>
+                  <Text fontWeight="medium">Message</Text>
+                  <Text fontStyle="italic">{solution.message}</Text>
+                </Box>
+              )}
+            </VStack>
+          </Box>
+        )}
+
+        {solution?.solutionFound && (
+          <Box mt={6}>
+            <HStack justify="space-between" mb={4}>
+              <Text fontSize="lg" fontWeight="bold">Solution Assignment</Text>
+              <Box 
+                display="inline-flex" 
+                px={2} 
+                py={1} 
+                bg="green.100" 
+                color="green.800" 
+                borderRadius="md" 
+                fontSize="sm"
+              >
+                Valid Assignment
+              </Box>
+            </HStack>
+            
+            <Box overflowX="auto">
+              {renderSolutionTable(solution)}
+            </Box>
+          </Box>
+        )}
+
+        {!solution && !isSolving && (
           <Alert status="info" borderRadius="md" mt={6}>
             <AlertIcon />
             <Box>
-              <AlertTitle>No solutions yet</AlertTitle>
-              <AlertDescription>
-                Click the "Solve" button to find valid user assignments for the workflow.
-              </AlertDescription>
+              <Text fontWeight="bold">No solutions yet</Text>
+              <Text>Click the "Solve" button to find valid user assignments for the workflow.</Text>
             </Box>
           </Alert>
         )}

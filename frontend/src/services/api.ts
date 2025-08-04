@@ -83,27 +83,31 @@ export interface WSPRequest {
   authorized: number[][];
   mustSameConstraints: Constraint[];      // For BOD (Binding of Duty)
   mustDifferentConstraints: Constraint[]; // For SOD (Separation of Duty)
-  solverType: 'SAT' | 'CSP';
+  solverType: 'SAT' | 'CSP' | 'BACKTRACKING' | 'PBT';
 }
 
-export interface WSPSolution {
-  assignments: number[];
-  isComplete: boolean;
+// Matches backend's WSPResponse class
+export interface WSPResponse {
+  solutionFound: boolean;
+  assignment: number[];
+  solvingTimeMs: number;
+  solverUsed: string;
+  message: string;
 }
 
 export const wspApi = {
-  async solveWSP(request: Omit<WSPRequest, 'solverType'> & { solverType?: 'SAT' | 'CSP' }): Promise<WSPSolution> {
-    // Ensure solverType has a default value if not provided
-    const payload: WSPRequest = {
-      ...request,
-      solverType: request.solverType || 'SAT' // Default to SAT solver if not specified
-    };
-    const response = await apiClient.post<WSPSolution>('/wsp/solve', payload);
+  async solveWSP(request: WSPRequest): Promise<WSPResponse> {
+    const response = await apiClient.post<WSPResponse>('/solve', request);
     return response.data;
   },
 
-  async checkHealth(): Promise<{ status: string }> {
-    const response = await apiClient.get<{ status: string }>('/health');
+  async getSupportedSolvers(): Promise<string[]> {
+    const response = await apiClient.get<string[]>('/solvers');
+    return response.data;
+  },
+
+  async checkHealth(): Promise<string> {
+    const response = await apiClient.get<string>('/health');
     return response.data;
   },
 
