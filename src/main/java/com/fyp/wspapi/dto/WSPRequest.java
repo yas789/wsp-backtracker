@@ -20,7 +20,7 @@ public class WSPRequest {
     private List<Constraint> mustDifferentConstraints;
     
     @NotNull
-    private String solverType; // "SAT" or "CSP"
+    private String solverType; // "SAT", "CSP", "BACKTRACKING", or "PBT"
 
     // Constructors
     public WSPRequest() {}

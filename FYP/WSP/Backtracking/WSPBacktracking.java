@@ -70,8 +70,16 @@ private void backtracking(int stepIndex) {
 
 
 /*
+ * Get all found solutions
+ * @return List of solutions, where each solution is an array of user assignments
+ */
+public List<int[]> getSolutions() {
+    return new ArrayList<>(collectedEncodings);
+}
+
+/*
  * Print out assignments
- * @return all possible assignments
+ * @return all possible assignments as a formatted string
  */
 @Override
 public String toString(){
@@ -79,11 +87,10 @@ public String toString(){
         return "WSP instance is unsatisfiable: no valid assignments found.\n";
     }
     StringBuilder sb = new StringBuilder();
- for (int[] i : collectedEncodings){
-    sb.append(Arrays.toString(i)).append("\n");
-    
- }  
- return sb.toString(); 
+    for (int[] i : collectedEncodings){
+        sb.append(Arrays.toString(i)).append("\n");
+    }  
+    return sb.toString(); 
 }
 
 

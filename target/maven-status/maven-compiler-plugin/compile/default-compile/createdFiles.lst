@@ -41,7 +41,6 @@ com/fyp/wspapi/controller/WSPController.class
 com/fyp/wspapi/service/WSPService.class
 WSP/BenchmarkRunner.class
 com/fyp/wspapi/WspApiApplication.class
-com/fyp/wspapi/service/WSPService$ConstraintData.class
 WSP/WSPUtils.class
 com/fyp/wspapi/dto/AuthMatrixUpdateRequest$AuthMatrixUpdateRequestBuilder.class
 com/fyp/wspapi/dto/ConstraintResponse$ConstraintResponseBuilder.class

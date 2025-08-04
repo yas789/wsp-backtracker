@@ -157,7 +157,7 @@ const AlgorithmPage = () => {
       });
 
       // Ensure solver type is in the correct case for backend
-      const solverType = selectedAlgorithm.toUpperCase() as 'CSP' | 'SAT';
+      const solverType = selectedAlgorithm.toUpperCase() as 'CSP' | 'SAT' | 'BACKTRACKING' | 'PBT';
       
       // Prepare the request according to backend's WSPRequest
       const request = {
@@ -280,8 +280,10 @@ const AlgorithmPage = () => {
                 onChange={(e) => setSelectedAlgorithm(e.target.value)}
                 isDisabled={isSolving}
               >
-                <option value="csp">CSP Solver (Backtracking)</option>
-                <option value="sat">SAT Solver</option>
+                <option value="csp">CSP Solver (Constraint Satisfaction)</option>
+                <option value="sat">SAT Solver (Boolean Satisfiability)</option>
+                <option value="backtracking">Standard Backtracking</option>
+                <option value="pbt">Pattern-Based Backtracking</option>
               </Select>
               <Text fontSize="sm" color="gray.500" mt={1}>
                 Select the constraint satisfaction algorithm to use
