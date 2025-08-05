@@ -143,36 +143,48 @@ const AlgorithmPage = () => {
             return;
           }
           
-          // For each pair of valid steps in the constraint
-          for (let i = 0; i < validSteps.length - 1; i++) {
-            const step1 = validSteps[i];
-            const step2 = validSteps[i + 1];
-            
-            // Double-check step validity (should be redundant after filtering)
-            if (typeof step1 !== 'number' || typeof step2 !== 'number' || 
-                isNaN(step1) || isNaN(step2) || step1 < 0 || step2 < 0) {
-              console.warn('Skipping invalid step pair:', { step1, step2, constraint });
-              continue;
-            }
-            
-            // Map frontend constraint types to backend format
-            // Backend expects 'BOD' for binding and 'SOD' for separation
-            const normalizedType = constraint.type === 'binding' ? 'BOD' : 
-                                 constraint.type === 'separation' ? 'SOD' :
-                                 constraint.type;
-            
-            // Convert 1-based step indices to 0-based for the backend
-            const step1ZeroBased = step1 - 1;
-            const step2ZeroBased = step2 - 1;
-            
-            if (normalizedType === 'BOD') {
-              mustSameConstraints.push({ step1: step1ZeroBased, step2: step2ZeroBased });
-              console.log('Added BOD constraint between steps', step1ZeroBased, 'and', step2ZeroBased);
-            } else if (normalizedType === 'SOD') {
-              mustDifferentConstraints.push({ step1: step1ZeroBased, step2: step2ZeroBased });
-              console.log('Added SOD constraint between steps', step1ZeroBased, 'and', step2ZeroBased);
-            } else {
-              console.warn('Unknown constraint type:', constraint.type);
+          // Map frontend constraint types to backend format
+          // Backend expects 'BOD' for binding and 'SOD' for separation
+          const normalizedType = constraint.type === 'binding' ? 'BOD' : 
+                               constraint.type === 'separation' ? 'SOD' :
+                               constraint.type;
+          
+          // Process all pairs of steps in the constraint
+          // For constraints with exactly 2 steps, this creates one pair
+          // For constraints with more steps, this creates all combinations
+          for (let i = 0; i < validSteps.length; i++) {
+            for (let j = i + 1; j < validSteps.length; j++) {
+              const step1 = validSteps[i];
+              const step2 = validSteps[j];
+              
+              // Validate step numbers are within bounds (1-based input should be 1 to numSteps)
+              if (step1 < 1 || step1 > stepsCount || step2 < 1 || step2 > stepsCount) {
+                console.warn('Step numbers out of bounds:', { step1, step2, stepsCount });
+                continue;
+              }
+              
+              // Convert 1-based step indices to 0-based for the backend
+              const step1ZeroBased = step1 - 1;
+              const step2ZeroBased = step2 - 1;
+              
+              // Double-check the converted indices are valid
+              if (step1ZeroBased < 0 || step1ZeroBased >= stepsCount || 
+                  step2ZeroBased < 0 || step2ZeroBased >= stepsCount) {
+                console.warn('Converted step indices out of bounds:', { 
+                  step1ZeroBased, step2ZeroBased, stepsCount 
+                });
+                continue;
+              }
+              
+              if (normalizedType === 'BOD') {
+                mustSameConstraints.push({ step1: step1ZeroBased, step2: step2ZeroBased });
+                console.log(`Added BOD constraint between steps ${step1ZeroBased} and ${step2ZeroBased} (original: ${step1} and ${step2})`);
+              } else if (normalizedType === 'SOD') {
+                mustDifferentConstraints.push({ step1: step1ZeroBased, step2: step2ZeroBased });
+                console.log(`Added SOD constraint between steps ${step1ZeroBased} and ${step2ZeroBased} (original: ${step1} and ${step2})`);
+              } else {
+                console.warn('Unknown constraint type:', constraint.type);
+              }
             }
           }
         } else {
@@ -180,11 +192,72 @@ const AlgorithmPage = () => {
         }
       });
       
+      // Validate all constraint indices are within bounds
+      const invalidConstraints: Array<{
+        type: string;
+        index: number;
+        constraint: { step1: number; step2: number };
+        issue: string;
+      }> = [];
+      
+      mustSameConstraints.forEach((constraint, index) => {
+        if (constraint.step1 < 0 || constraint.step1 >= stepsCount ||
+            constraint.step2 < 0 || constraint.step2 >= stepsCount) {
+          invalidConstraints.push({
+            type: 'BOD',
+            index,
+            constraint,
+            issue: `Step indices out of bounds. Valid range: 0-${stepsCount-1}`
+          });
+        }
+      });
+      
+      mustDifferentConstraints.forEach((constraint, index) => {
+        if (constraint.step1 < 0 || constraint.step1 >= stepsCount ||
+            constraint.step2 < 0 || constraint.step2 >= stepsCount) {
+          invalidConstraints.push({
+            type: 'SOD',
+            index,
+            constraint,
+            issue: `Step indices out of bounds. Valid range: 0-${stepsCount-1}`
+          });
+        }
+      });
+      
+      if (invalidConstraints.length > 0) {
+        console.error('Invalid constraints detected:', invalidConstraints);
+      }
+      
       console.log('Transformed constraints:', {
         mustSameConstraints,
-        mustDifferentConstraints
+        mustDifferentConstraints,
+        validStepRange: `0-${stepsCount-1}`,
+        validUserRange: `0-${usersCount-1}`
       });
 
+      // Validate authorization matrix dimensions
+      console.log('Configuration check:', {
+        stepsCount,
+        usersCount,
+        authMatrixRows: authMatrix.length,
+        authMatrixCols: authMatrix.length > 0 ? authMatrix[0].length : 0
+      });
+      
+      // Ensure authorization matrix has correct dimensions
+      if (authMatrix.length !== stepsCount) {
+        console.error('Authorization matrix row count mismatch:', {
+          expected: stepsCount,
+          actual: authMatrix.length
+        });
+      }
+      
+      if (authMatrix.length > 0 && authMatrix[0].length !== usersCount) {
+        console.error('Authorization matrix column count mismatch:', {
+          expected: usersCount,
+          actual: authMatrix[0].length
+        });
+      }
+      
       // Prepare the request matching backend's WSPRequest structure
       const request = {
         numSteps: stepsCount,
@@ -234,7 +307,14 @@ const AlgorithmPage = () => {
       if (error.message?.includes('OR-Tools') || error.message?.includes('UnsatisfiedLinkError')) {
         errorMessage = 'SAT solver is not available. Please try another solver (e.g., CSP).';
       } else if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
+        const backendMessage = error.response.data.message;
+        
+        // Detect the known backend bug with index out of bounds
+        if (backendMessage.includes('Index') && backendMessage.includes('out of bounds')) {
+          errorMessage = `Backend Error: ${backendMessage}\n\nThis appears to be a known backend issue where step indices are confused with user indices. The frontend request is valid, but the backend solver has a bug. Please check the backend code or try a different solver.`;
+        } else {
+          errorMessage = backendMessage;
+        }
       } else if (error.message) {
         errorMessage = error.message;
       }

@@ -32,7 +32,7 @@ const HomePage = () => {
   const config = context?.config || { steps: 0, users: 0 };
   const constraints = context?.constraints || [];
   const authMatrix = context?.authMatrix || [];
-  const solutionHistory = context?.solutionHistory || [];
+  const solutions = context?.solutions || [];
   
   const cardBg = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
@@ -46,7 +46,7 @@ const HomePage = () => {
       config: config.steps > 0 && config.users > 0,
       auth: authMatrix.length > 0,
       constraints: constraints.length > 0,
-      solved: solutionHistory.length > 0,
+      solved: solutions.length > 0,
     };
   };
 
@@ -90,7 +90,7 @@ const HomePage = () => {
       path: '/solver',
       color: 'orange',
       completed: status.solved,
-      stats: solutionHistory.length > 0 ? `${solutionHistory.length} solutions found` : 'Not solved yet',
+      stats: solutions.length > 0 ? `${solutions.length} solutions found` : 'Not solved yet',
     },
   ];
 
