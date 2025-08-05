@@ -1,67 +1,153 @@
 # WSP Solver: Workflow Satisfiability & Constraint Manager
- 
-This repository focuses on solving the **Workflow Satisfiability Problem (WSP)** with both a Fixed‑Parameter Tractable (FPT) backtracking algorithm and a SAT/CSP encoding using Google OR‑Tools. 
 
----
-## ⚙️ Prerequisites
+[![Java](https://img.shields.io/badge/Java-11%2B-blue)](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-1. **Java 11+**  
-   Verify with:  
+A comprehensive solution for the Workflow Satisfiability Problem (WSP) featuring both a Fixed-Parameter Tractable (FPT) backtracking algorithm and a SAT/CSP encoding using Google OR-Tools. The application includes an intuitive web-based interface for configuring and solving workflow authorization problems.
+
+## 🌟 Features
+
+- **Dual Solving Approaches**
+  - FPT Backtracking Algorithm (PBT)
+  - SAT/CSP Encoding with Google OR-Tools
+  
+- **Interactive Web Interface**
+  - Step-by-step workflow configuration
+  - Visual authorization matrix editor
+  - Constraint management
+  - Real-time solution visualization
+
+- **Performance Optimized**
+  - O*(2ᵏ) time complexity for k steps
+  - Efficient pruning strategies
+  - Native library optimization
+
+## 🚀 Quick Start
+
+### Prerequisites
+- **Java 11 or later** ([Download](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html))
+- **Node.js 14+** (for frontend development, [Download](https://nodejs.org/))
+
+### Running the Application
+
+1. **Make the run script executable** (first time only):
    ```bash
-   java -version
+   chmod +x run.sh
+   ```
 
-## 🛠️ Manual Build & Run
-**Technically, once you have Java 11+ installed, all you need to do is:**
-- **Make the script executable (only once):**
-chmod +x run.sh
--**Build & launch the application:**
-./run.sh
+2. **Start the application**:
+   ```bash
+   ./run.sh
+   ```
+   This will:
+   - Compile the Java backend
+   - Install frontend dependencies
+   - Start the development server
+   - Open the application in your default browser
 
-## 📝 Project Overview
+## 🏗️ Project Structure
 
-- **Workflow Satisfiability Problem (WSP)**  
-  Assign each workflow step to exactly one authorized user while respecting pairwise constraints:
-  - **Must‑same**: two steps must go to the same user  
-  - **Must‑different**: two steps must go to different users  
+```
+wsp-backtracker/
+├── frontend/           # React-based web interface
+│   ├── public/         # Static files
+│   └── src/            # React components and logic
+│       ├── pages/      # Application pages
+│       ├── components/ # Reusable UI components
+│       └── context/    # Application state management
+│
+├── src/
+│   └── main/java/com/fyp/wspapi/
+│       ├── controller/ # REST API endpoints
+│       ├── model/      # Data models
+│       ├── service/    # Business logic
+│       └── solver/     # WSP solving algorithms
+│
+└── run.sh             # Build and run script
+```
 
-- **PBT (Parameter‑Backtracking) Algorithm**  
-  A recursive XP/FPT backtracking algorithm parameterized by the number of steps (k), with heavy pruning to achieve practical performance in **O*(2ᵏ)** time.
+## 🔧 Configuration
 
-- **SAT/CSP Encoding**  
-  Translate each WSP instance into a CP‑SAT model:
-  - Boolean variables **x[s][u]** encode “user u is assigned to step s.”  
-  - Clauses enforce “exactly one user per step,” authorization restrictions, and must‑same/must‑different constraints.  
-  - Solved by **Google OR‑Tools CP‑SAT** engine.
+### Backend Configuration
+Edit `src/main/resources/application.properties` to configure:
+- Server port (default: 8080)
+- Logging levels
+- Solver parameters
 
-- **Swing‑Based Wizard GUI**  
-  A four‑page flow that guides the user through:
-  1. **Configuration** (users & steps)  
-  2. **Authorization Matrix** (who can do which steps)  
-  3. **Step Constraints** (equality/inequality between steps)  
-  4. **Algorithm Selection** (run PBT or SAT/CSP solver)
+### Frontend Configuration
+Edit `frontend/.env` to configure:
+- API base URL
+- Feature flags
+- UI settings
 
-## 🖥️ GUI Walk‑through
+## 🧩 Solving the Workflow Satisfiability Problem
 
-### Page 1: Configuration
-- **Number of Users:** enter an integer  
-- **Number of Steps:** enter an integer  
-- Click **Update** to resize downstream panels.
+### Problem Definition
+Assign each workflow step to exactly one authorized user while respecting:
+- **Must-same** constraints: Two steps must be assigned to the same user
+- **Must-different** constraints: Two steps must be assigned to different users
 
-### Page 2: Authorization Matrix
-- **User:** choose “All Users” or a specific user  
-- **Step:** choose “All Steps” or a specific step  
-- **Authorization:** select **Authorized** or **Unauthorized**  
-- Click **Update Authorization**  
-  - Bulk or individual updates are applied to the hidden N×M matrix  
-  - The text log shows each change and prints the current matrix  
+### Algorithms
 
-### Page 3: Step Constraints
-- **Step 1:** select one step  
-- **Operator:** choose **=** or **≠**  
-- **Step 2:** select another step  
-- Click **Add Constraint** to record it in the graph and log  
+#### 1. PBT (Parameter-Backtracking) Algorithm
+- Recursive FPT algorithm parameterized by the number of steps (k)
+- Heavy pruning for practical performance
+- Time complexity: O*(2ᵏ)
 
-### Page 4: Run Algorithm
-- **PBT Solver:** runs the FPT backtracking algorithm  
-- **SAT/CSP Solver:** encodes the instance to CP‑SAT and invokes OR‑Tools  
-- **Note:** on the first click of either button, loading OR‑Tools’ native libraries may take 1–2 seconds; subsequent runs are much faster.  
+#### 2. SAT/CSP Encoding
+- Translates WSP instances into CP-SAT models
+- Uses Google OR-Tools for solving
+- Supports complex constraints and optimizations
+
+## 🖥️ User Guide
+
+### 1. Configuration
+- Set the number of users and steps
+- Click "Update" to apply changes
+
+### 2. Authorization Matrix
+- Define which users are authorized for which steps
+- Use bulk actions for quick updates
+- Visual feedback for current authorizations
+
+### 3. Step Constraints
+- Add equality (=) or inequality (≠) constraints between steps
+- Visual graph of constraints
+- Real-time validation
+
+### 4. Solve
+- Choose between PBT or SAT/CSP solver
+- View solution details and statistics
+- Export results if needed
+
+## 🐛 Troubleshooting
+
+### Common Issues
+1. **Port already in use**
+   - Check for other Java processes: `jps -l`
+   - Kill the process: `kill <PID>`
+   - Or change the server port in `application.properties`
+
+2. **Java version issues**
+   - Verify Java version: `java -version`
+   - Ensure JAVA_HOME is set correctly
+
+3. **Frontend build errors**
+   - Clear node modules: `cd frontend && rm -rf node_modules`
+   - Reinstall dependencies: `npm install`
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📧 Contact
+
+For questions or feedback, please open an issue on GitHub.
