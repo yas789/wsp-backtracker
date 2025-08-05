@@ -22,8 +22,8 @@ public class WSPService {
             int[] solution;
             String solverUsed = request.getSolverType();
             
-            // Transpose the authorization matrix to match GUI's format (stepByUser)
-            int[][] stepByUser = WSPUtils.transpose(request.getAuthorized());
+            // Use the authorization matrix as-is (already in steps × users format)
+            int[][] stepByUser = request.getAuthorized();
 
             switch (solverUsed.toUpperCase()) {
                 case "SAT":

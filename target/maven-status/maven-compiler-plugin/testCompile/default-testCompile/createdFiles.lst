@@ -1,4 +1,7 @@
 WSP/ConstraintGraphTest.class
 WSP/WSPOrchestratorTest.class
 WSP/WSPTest.class
+com/fyp/wspapi/controller/WSPControllerTest.class
+com/fyp/wspapi/service/WSPServiceTest.class
 WSP/WSPBacktrackingTest.class
+com/fyp/wspapi/controller/WSPControllerIntegrationTest.class
