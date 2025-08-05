@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Button, Checkbox, Heading, Table, Thead, Tbody, Tr, Th, Td, useToast, Text } from '@chakra-ui/react';
+import { Box, Button, Checkbox, Heading, Table, Thead, Tbody, Tr, Th, Td, useToast, Text, HStack, VStack } from '@chakra-ui/react';
 import { useAppContext } from '../context/AppContext';
 
 interface AuthMatrixProps {
@@ -40,10 +40,68 @@ const AuthMatrix: React.FC<AuthMatrixProps> = ({ steps, users, onNext }) => {
     sessionStorage.setItem('authMatrix', JSON.stringify(matrix));
   }, [matrix]);
 
-  const toggleAuth = (stepIndex: number, userIndex: number) => {
+  // Toggle cell value
+  const toggleCell = (step: number, user: number) => {
     const newMatrix = [...matrix];
-    newMatrix[stepIndex][userIndex] = !newMatrix[stepIndex][userIndex];
+    newMatrix[step][user] = !newMatrix[step][user];
     setMatrix(newMatrix);
+  };
+
+  // Select all steps (all cells)
+  const selectAllSteps = () => {
+    const newMatrix = Array(steps).fill(0).map(() => Array(users).fill(true));
+    setMatrix(newMatrix);
+  };
+
+  // Deselect all steps (clear all cells)
+  const deselectAllSteps = () => {
+    const newMatrix = Array(steps).fill(0).map(() => Array(users).fill(false));
+    setMatrix(newMatrix);
+  };
+
+  // Select all users for a specific step (select entire row)
+  const selectAllUsersForStep = (stepIndex: number) => {
+    const newMatrix = [...matrix];
+    newMatrix[stepIndex] = Array(users).fill(true);
+    setMatrix(newMatrix);
+  };
+
+  // Deselect all users for a specific step (deselect entire row)
+  const deselectAllUsersForStep = (stepIndex: number) => {
+    const newMatrix = [...matrix];
+    newMatrix[stepIndex] = Array(users).fill(false);
+    setMatrix(newMatrix);
+  };
+
+  // Select all steps for a specific user (select entire column)
+  const selectAllStepsForUser = (userIndex: number) => {
+    const newMatrix = [...matrix];
+    for (let i = 0; i < steps; i++) {
+      newMatrix[i][userIndex] = true;
+    }
+    setMatrix(newMatrix);
+  };
+
+  // Deselect all steps for a specific user (deselect entire column)
+  const deselectAllStepsForUser = (userIndex: number) => {
+    const newMatrix = [...matrix];
+    for (let i = 0; i < steps; i++) {
+      newMatrix[i][userIndex] = false;
+    }
+    setMatrix(newMatrix);
+  };
+
+  // Check if all cells are selected
+  const isAllSelected = matrix.length > 0 && matrix.every(row => row.every(cell => cell));
+
+  // Check if all users are selected for a specific step
+  const isRowAllSelected = (stepIndex: number) => {
+    return matrix[stepIndex] && matrix[stepIndex].every(cell => cell);
+  };
+
+  // Check if all steps are selected for a specific user
+  const isColumnAllSelected = (userIndex: number) => {
+    return matrix.every(row => row[userIndex]);
   };
 
   const handleSubmit = () => {
@@ -65,25 +123,64 @@ const AuthMatrix: React.FC<AuthMatrixProps> = ({ steps, users, onNext }) => {
         Each step must have at least one authorized user.
       </Text>
       
-      <Box overflowX="auto">
-        <Table variant="simple" size="sm">
+      {/* Select All Controls */}
+      <Box mb={4} p={4} bg="gray.50" borderRadius="lg">
+        <Text fontWeight="medium" mb={3}>Quick Selection</Text>
+        <HStack spacing={4} wrap="wrap">
+          <Button
+            size="sm"
+            colorScheme={isAllSelected ? "green" : "blue"}
+            onClick={isAllSelected ? deselectAllSteps : selectAllSteps}
+            leftIcon={isAllSelected ? <Text>✓</Text> : <Text>□</Text>}
+          >
+            {isAllSelected ? "Deselect All" : "Select All Steps"}
+          </Button>
+        </HStack>
+      </Box>
+
+      <Box overflowX="auto" borderWidth="1px" borderRadius="lg" p={4} bg="white">
+        <Table variant="simple" size="md">
           <Thead>
             <Tr>
               <Th>Step \ User</Th>
-              {Array(users).fill(0).map((_, i) => (
-                <Th key={`user-${i}`} textAlign="center">U{i + 1}</Th>
+              {Array.from({ length: users }, (_, i) => (
+                <Th key={`user-${i}`} textAlign="center">
+                  <VStack spacing={2}>
+                    <Text>User {i + 1}</Text>
+                    <Button
+                      size="xs"
+                      colorScheme={isColumnAllSelected(i) ? "green" : "blue"}
+                      onClick={isColumnAllSelected(i) ? () => deselectAllStepsForUser(i) : () => selectAllStepsForUser(i)}
+                      title={isColumnAllSelected(i) ? "Deselect all steps for this user" : "Select all steps for this user"}
+                    >
+                      {isColumnAllSelected(i) ? "✓ All" : "Select All"}
+                    </Button>
+                  </VStack>
+                </Th>
               ))}
             </Tr>
           </Thead>
           <Tbody>
             {matrix.map((row, stepIndex) => (
               <Tr key={`step-${stepIndex}`}>
-                <Td fontWeight="bold">Step {stepIndex + 1}</Td>
+                <Td fontWeight="medium">
+                  <HStack spacing={3}>
+                    <Text>Step {stepIndex + 1}</Text>
+                    <Button
+                      size="xs"
+                      colorScheme={isRowAllSelected(stepIndex) ? "green" : "blue"}
+                      onClick={isRowAllSelected(stepIndex) ? () => deselectAllUsersForStep(stepIndex) : () => selectAllUsersForStep(stepIndex)}
+                      title={isRowAllSelected(stepIndex) ? "Deselect all users for this step" : "Select all users for this step"}
+                    >
+                      {isRowAllSelected(stepIndex) ? "✓ All" : "Select All"}
+                    </Button>
+                  </HStack>
+                </Td>
                 {row.map((isChecked, userIndex) => (
                   <Td key={`cell-${stepIndex}-${userIndex}`} textAlign="center">
                     <Checkbox
                       isChecked={isChecked}
-                      onChange={() => toggleAuth(stepIndex, userIndex)}
+                      onChange={() => toggleCell(stepIndex, userIndex)}
                       colorScheme="blue"
                     />
                   </Td>

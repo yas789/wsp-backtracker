@@ -54,6 +54,7 @@ const ConstraintsPage = () => {
   const [selectedType, setSelectedType] = useState<ConstraintType>('separation');
   const [selectedSteps, setSelectedSteps] = useState<number[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   // Removed kValue state as it's not used in the Java backend
   const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate();
@@ -92,17 +93,17 @@ const ConstraintsPage = () => {
     }, 0);
   };
 
-  // Check if configuration exists
+  // Initialize loading state
   useEffect(() => {
-    if (!config || config.steps === 0 || config.users === 0) {
-      toast({
-        title: 'Configuration missing',
-        description: 'Please configure the workflow first',
-        status: 'warning',
-      });
-      navigate('/config');
+    // Set loading to false after first check
+    setIsLoading(false);
+    
+    // TODO: Re-enable config validation after debugging
+    // For now, just log the config to see what we're getting
+    if (config) {
+      console.log('ConstraintsPage - Config received:', config);
     }
-  }, [config, navigate, toast]);
+  }, [config]);
 
   const handleAddConstraint = () => {
     if (selectedSteps.length !== 2) {
@@ -165,19 +166,14 @@ const ConstraintsPage = () => {
     return type === 'separation' ? 'red' : 'blue';
   };
 
-  // Get steps and users count from session storage
-  const wspConfig = JSON.parse(sessionStorage.getItem('wspConfig') || '{}');
-  const stepsCount = wspConfig.steps || 0;
-  const usersCount = wspConfig.users || 0;
-
-  if (stepsCount === 0 || usersCount === 0) {
+  // Show loading spinner while checking configuration
+  if (isLoading) {
     return (
-      <Box p={6}>
-        <Heading size="lg" mb={4}>Constraints</Heading>
-        <Text>Please complete the configuration first.</Text>
-        <Button mt={4} colorScheme="blue" onClick={() => navigate('/config')}>
-          Go to Configuration
-        </Button>
+      <Box p={6} display="flex" justifyContent="center" alignItems="center" minH="200px">
+        <VStack spacing={4}>
+          <Box className="spinner" />
+          <Text>Loading constraints...</Text>
+        </VStack>
       </Box>
     );
   }
@@ -278,7 +274,7 @@ const ConstraintsPage = () => {
                       setSelectedSteps(newSteps);
                     }}
                   >
-                    {Array.from({ length: stepsCount }, (_, i) => i + 1).map((step) => (
+                    {Array.from({ length: config.steps || 0 }, (_, i) => i + 1).map((step) => (
                       <option key={`first-${step}`} value={step} disabled={selectedSteps[1] === step}>
                         Step {step}
                       </option>
@@ -294,7 +290,7 @@ const ConstraintsPage = () => {
                       setSelectedSteps(newSteps);
                     }}
                   >
-                    {Array.from({ length: stepsCount }, (_, i) => i + 1).map((step) => (
+                    {Array.from({ length: config.steps || 0 }, (_, i) => i + 1).map((step) => (
                       <option key={`second-${step}`} value={step} disabled={selectedSteps[0] === step}>
                         Step {step}
                       </option>
@@ -315,7 +311,7 @@ const ConstraintsPage = () => {
               <FormControl>
                 <FormLabel>Apply to Specific Users (Optional)</FormLabel>
                 <HStack spacing={2} flexWrap="wrap">
-                  {Array.from({ length: usersCount }, (_, i) => i + 1).map((user) => (
+                  {Array.from({ length: config.users || 0 }, (_, i) => i + 1).map((user) => (
                     <Button
                       key={user}
                       size="sm"
