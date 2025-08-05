@@ -35,19 +35,22 @@ import {
   NumberDecrementStepper,
 } from '@chakra-ui/react';
 import { AddIcon, DeleteIcon } from '@chakra-ui/icons';
+import { useAppContext } from '../context/AppContext';
+import { Constraint as BaseConstraint, ConstraintType as BaseConstraintType } from '../types/wsp';
 
 type ConstraintType = 'separation' | 'binding';
 
-export interface Constraint {
+// Extend the base constraint with UI-specific properties
+export interface UIConstraint extends BaseConstraint {
   id: string;
-  type: ConstraintType;
-  steps: number[];
+  type: ConstraintType; // Override to use local constraint types
   users?: number[];
   k?: number;
 }
 
 const ConstraintsPage = () => {
-  const [constraints, setConstraints] = useState<Constraint[]>([]);
+  const { constraints: globalConstraints, setConstraints: setGlobalConstraints, config } = useAppContext();
+  const [constraints, setConstraints] = useState<UIConstraint[]>([]);
   const [selectedType, setSelectedType] = useState<ConstraintType>('separation');
   const [selectedSteps, setSelectedSteps] = useState<number[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
@@ -56,18 +59,40 @@ const ConstraintsPage = () => {
   const navigate = useNavigate();
   const toast = useToast();
 
-  // Load saved constraints from session storage
+  // Load constraints from global state and convert to UIConstraints
   useEffect(() => {
-    const savedConstraints = sessionStorage.getItem('wspConstraints');
-    if (savedConstraints) {
-      setConstraints(JSON.parse(savedConstraints));
-    }
-  }, []);
+    const uiConstraints: UIConstraint[] = globalConstraints.map((constraint, index) => ({
+      ...constraint,
+      id: `constraint-${index}`,
+      type: constraint.type === 'SOD' ? 'separation' : 
+            constraint.type === 'BOD' ? 'binding' :
+            constraint.type as ConstraintType
+    }));
+    setConstraints(uiConstraints);
+  }, [globalConstraints]);
 
-  // Save constraints to session storage when they change
+  // Sync local constraints to global state
   useEffect(() => {
-    sessionStorage.setItem('wspConstraints', JSON.stringify(constraints));
-  }, [constraints]);
+    const globalConstraints: BaseConstraint[] = constraints.map(constraint => ({
+      type: constraint.type === 'separation' ? 'SOD' : 
+            constraint.type === 'binding' ? 'BOD' :
+            constraint.type as BaseConstraintType,
+      steps: constraint.steps
+    }));
+    setGlobalConstraints(globalConstraints);
+  }, [constraints, setGlobalConstraints]);
+
+  // Check if configuration exists
+  useEffect(() => {
+    if (!config || config.steps === 0 || config.users === 0) {
+      toast({
+        title: 'Configuration missing',
+        description: 'Please configure the workflow first',
+        status: 'warning',
+      });
+      navigate('/config');
+    }
+  }, [config, navigate, toast]);
 
   const handleAddConstraint = () => {
     if (selectedSteps.length !== 2) {
@@ -83,7 +108,7 @@ const ConstraintsPage = () => {
 
     // Only separation and binding constraints are supported
 
-    const newConstraint: Constraint = {
+    const newConstraint: UIConstraint = {
       id: Date.now().toString(),
       type: selectedType,
       steps: [...selectedSteps],
@@ -115,7 +140,7 @@ const ConstraintsPage = () => {
     navigate('/solver');
   };
 
-  const getConstraintLabel = (constraint: Constraint) => {
+  const getConstraintLabel = (constraint: UIConstraint) => {
     const stepText = `Step ${constraint.steps[0]} and Step ${constraint.steps[1]}`;
     return constraint.type === 'separation' 
       ? `Separation of Duty: ${stepText} must be assigned to different users`

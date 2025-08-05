@@ -20,6 +20,7 @@ import {
   FiMoon,
   FiSun
 } from 'react-icons/fi';
+import ResetButton from '../shared/ResetButton';
 
 interface SidebarProps {
   onClose?: () => void;

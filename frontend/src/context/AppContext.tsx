@@ -1,147 +1,137 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { WSPResponse } from '@/types/wsp';
+import { Constraint } from '../types/wsp';
 
 interface AppState {
-  // Configuration
-  numSteps: number;
-  numUsers: number;
-  
-  // Authorization matrix
+  config: { steps: number; users: number };
+  constraints: Constraint[];
   authMatrix: number[][];
-  
-  // Constraints
-  constraints: Array<{
-    id: string;
-    type: 'BOD' | 'SOD' | 'binding' | 'separation';
-    steps: number[];
-  }>;
-  
-  // Solutions
-  solutions: WSPResponse[];
-  currentSolution: WSPResponse | null;
-  executionHistory: WSPResponse[];
+  solutions: any[]; // Store solution history
 }
 
 interface AppContextType extends AppState {
-  setNumSteps: (steps: number) => void;
-  setNumUsers: (users: number) => void;
+  setConfig: (config: { steps: number; users: number }) => void;
+  setConstraints: (constraints: Constraint[]) => void;
   setAuthMatrix: (matrix: number[][]) => void;
-  addConstraint: (constraint: Omit<AppState['constraints'][0], 'id'>) => void;
-  removeConstraint: (id: string) => void;
-  setSolutions: (solutions: WSPResponse[]) => void;
-  setCurrentSolution: (solution: WSPResponse | null) => void;
-  addToHistory: (solution: WSPResponse) => void;
-  resetState: () => void;
+  setSolutions: (solutions: any[]) => void;
+  addSolution: (solution: any) => void;
+  clearAll: () => void;
+  clearSolutions: () => void;
 }
 
-const initialState: AppState = {
-  numSteps: 4,
-  numUsers: 4,
-  authMatrix: [],
+const defaultState: AppState = {
+  config: { steps: 0, users: 0 },
   constraints: [],
-  solutions: [],
-  currentSolution: null,
-  executionHistory: []
+  authMatrix: [],
+  solutions: []
 };
-
-const STORAGE_KEY = 'wsp_app_state';
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-export const AppProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
+export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, setState] = useState<AppState>(() => {
-    // Load state from localStorage on initial render
+    // Initialize from localStorage or use defaults
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      return saved ? JSON.parse(saved) : initialState;
+      try {
+        const saved = localStorage.getItem('wspAppState');
+        return saved ? JSON.parse(saved) : defaultState;
+      } catch (error) {
+        console.error('Error loading state from localStorage:', error);
+        return defaultState;
+      }
     }
-    return initialState;
+    return defaultState;
   });
 
-  // Save state to localStorage whenever it changes
+  // Save to localStorage whenever state changes
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('wspAppState', JSON.stringify(state));
+      } catch (error) {
+        console.error('Error saving state to localStorage:', error);
+      }
+    }
   }, [state]);
 
-  const setNumSteps = (steps: number) => {
-    setState(prev => ({
-      ...prev,
-      numSteps: steps,
-      // Reset auth matrix when steps change
-      authMatrix: Array(steps).fill(0).map(() => Array(prev.numUsers).fill(0))
-    }));
-  };
+  // Migration from sessionStorage on first load
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
 
-  const setNumUsers = (users: number) => {
-    setState(prev => ({
-      ...prev,
-      numUsers: users,
-      // Reset auth matrix when users change
-      authMatrix: prev.authMatrix.map(row => 
-        row.length > users ? row.slice(0, users) : [...row, ...Array(users - row.length).fill(0)]
-      )
-    }));
-  };
+    // Check if we have sessionStorage data but no localStorage data
+    const hasSessionData = sessionStorage.getItem('wspConfig') || 
+                          sessionStorage.getItem('wspConstraints') || 
+                          sessionStorage.getItem('authMatrix');
+    
+    const hasLocalData = localStorage.getItem('wspAppState');
 
-  const setAuthMatrix = (authMatrix: number[][]) => {
-    setState(prev => ({
-      ...prev,
-      authMatrix
-    }));
-  };
+    if (hasSessionData && !hasLocalData) {
+      console.log('Migrating data from sessionStorage to localStorage...');
+      
+      try {
+        const migratedState = {
+          config: JSON.parse(sessionStorage.getItem('wspConfig') || '{"steps": 0, "users": 0}'),
+          constraints: JSON.parse(sessionStorage.getItem('wspConstraints') || '[]'),
+          authMatrix: JSON.parse(sessionStorage.getItem('authMatrix') || '[]'),
+          solutions: []
+        };
+        
+        setState(migratedState);
+        
+        // Clear session storage after migration
+        sessionStorage.removeItem('wspConfig');
+        sessionStorage.removeItem('wspConstraints');
+        sessionStorage.removeItem('authMatrix');
+        
+        console.log('Migration completed successfully');
+      } catch (error) {
+        console.error('Error during migration:', error);
+      }
+    }
+  }, []);
 
-  const addConstraint = (constraint: Omit<AppState['constraints'][0], 'id'>) => {
-    setState(prev => ({
-      ...prev,
-      constraints: [...prev.constraints, { ...constraint, id: Date.now().toString() }]
-    }));
-  };
+  const setConfig = (config: { steps: number; users: number }) => 
+    setState(prev => ({ ...prev, config }));
 
-  const removeConstraint = (id: string) => {
-    setState(prev => ({
-      ...prev,
-      constraints: prev.constraints.filter(c => c.id !== id)
-    }));
-  };
+  const setConstraints = (constraints: Constraint[]) => 
+    setState(prev => ({ ...prev, constraints }));
 
-  const setSolutions = (solutions: WSPResponse[]) => {
-    setState(prev => ({
-      ...prev,
-      solutions
-    }));
-  };
+  const setAuthMatrix = (authMatrix: number[][]) => 
+    setState(prev => ({ ...prev, authMatrix }));
 
-  const setCurrentSolution = (currentSolution: WSPResponse | null) => {
-    setState(prev => ({
-      ...prev,
-      currentSolution
-    }));
-  };
+  const setSolutions = (solutions: any[]) => 
+    setState(prev => ({ ...prev, solutions }));
 
-  const addToHistory = (solution: WSPResponse) => {
-    setState(prev => ({
-      ...prev,
-      executionHistory: [solution, ...prev.executionHistory].slice(0, 100) // Keep last 100 solutions
+  const addSolution = (solution: any) => 
+    setState(prev => ({ 
+      ...prev, 
+      solutions: [...prev.solutions, { ...solution, timestamp: new Date().toISOString() }] 
     }));
-  };
 
-  const resetState = () => {
-    setState(initialState);
+  const clearSolutions = () => 
+    setState(prev => ({ ...prev, solutions: [] }));
+
+  const clearAll = () => {
+    setState(defaultState);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('wspAppState');
+      // Also clear any remaining sessionStorage items
+      sessionStorage.removeItem('wspConfig');
+      sessionStorage.removeItem('wspConstraints');
+      sessionStorage.removeItem('authMatrix');
+    }
   };
 
   return (
     <AppContext.Provider
       value={{
         ...state,
-        setNumSteps,
-        setNumUsers,
+        setConfig,
+        setConstraints,
         setAuthMatrix,
-        addConstraint,
-        removeConstraint,
         setSolutions,
-        setCurrentSolution,
-        addToHistory,
-        resetState
+        addSolution,
+        clearAll,
+        clearSolutions
       }}
     >
       {children}
@@ -149,10 +139,10 @@ export const AppProvider: React.FC<{children: React.ReactNode}> = ({ children })
   );
 };
 
-export const useAppState = () => {
+export const useAppContext = () => {
   const context = useContext(AppContext);
   if (context === undefined) {
-    throw new Error('useAppState must be used within an AppProvider');
+    throw new Error('useAppContext must be used within an AppProvider');
   }
   return context;
 };

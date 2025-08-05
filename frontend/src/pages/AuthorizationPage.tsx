@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Button, Checkbox, Heading, Table, Thead, Tbody, Tr, Th, Td, useToast, Text } from '@chakra-ui/react';
+import { useAppContext } from '../context/AppContext';
 
 interface AuthMatrixProps {
   steps: number;
@@ -9,20 +10,22 @@ interface AuthMatrixProps {
 }
 
 const AuthMatrix: React.FC<AuthMatrixProps> = ({ steps, users, onNext }) => {
+  const { authMatrix: savedAuthMatrix } = useAppContext();
   const [matrix, setMatrix] = useState<boolean[][]>([]);
   const [isComplete, setIsComplete] = useState<boolean>(false);
 
   // Initialize matrix with default values
   useEffect(() => {
-    const savedMatrix = sessionStorage.getItem('authMatrix');
-    if (savedMatrix) {
-      setMatrix(JSON.parse(savedMatrix));
+    if (savedAuthMatrix && savedAuthMatrix.length > 0) {
+      // Convert number matrix to boolean matrix
+      const boolMatrix = savedAuthMatrix.map(row => row.map(cell => cell === 1));
+      setMatrix(boolMatrix);
     } else {
       // Initialize with all false
       const initialMatrix = Array(steps).fill(0).map(() => Array(users).fill(false));
       setMatrix(initialMatrix);
     }
-  }, [steps, users]);
+  }, [steps, users, savedAuthMatrix]);
 
   // Check if at least one user is authorized for each step
   useEffect(() => {
@@ -112,25 +115,22 @@ const AuthMatrix: React.FC<AuthMatrixProps> = ({ steps, users, onNext }) => {
 const AuthorizationPage = () => {
   const navigate = useNavigate();
   const toast = useToast();
-  const [config, setConfig] = useState<{ steps: number; users: number } | null>(null);
+  const { config, setAuthMatrix } = useAppContext();
 
-  // Load configuration from session storage
+  // Check if configuration exists
   useEffect(() => {
-    const savedConfig = sessionStorage.getItem('wspConfig');
-    if (!savedConfig) {
+    if (!config || config.steps === 0 || config.users === 0) {
       toast({
         title: 'Configuration missing',
         description: 'Please configure the workflow first',
         status: 'warning',
       });
       navigate('/config');
-      return;
     }
-    setConfig(JSON.parse(savedConfig));
-  }, [navigate, toast]);
+  }, [config, navigate, toast]);
 
   const handleNext = (authMatrix: number[][]) => {
-    sessionStorage.setItem('authMatrix', JSON.stringify(authMatrix));
+    setAuthMatrix(authMatrix);
     toast({
       title: 'Authorization matrix saved',
       status: 'success',

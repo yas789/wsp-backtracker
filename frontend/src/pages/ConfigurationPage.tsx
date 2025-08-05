@@ -1,20 +1,28 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Button, FormControl, FormLabel, Heading, Input, VStack, NumberInput, NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, useToast } from '@chakra-ui/react';
+import { useAppContext } from '../context/AppContext';
 
 const ConfigurationPage = () => {
-  const [steps, setSteps] = useState<number>(4);
-  const [users, setUsers] = useState<number>(4);
+  const { config, setConfig } = useAppContext();
+  const [steps, setSteps] = useState<number>(config.steps || 4);
+  const [users, setUsers] = useState<number>(config.users || 4);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const navigate = useNavigate();
   const toast = useToast();
+
+  // Update local state when context changes
+  useEffect(() => {
+    if (config.steps > 0) setSteps(config.steps);
+    if (config.users > 0) setUsers(config.users);
+  }, [config]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Store configuration in session storage
-    sessionStorage.setItem('wspConfig', JSON.stringify({ steps, users }));
+    // Store configuration in app context
+    setConfig({ steps, users });
     
     // Show success message
     toast({
@@ -27,6 +35,7 @@ const ConfigurationPage = () => {
     
     // Navigate to authorization page
     navigate('/auth');
+    setIsSubmitting(false);
   };
 
   // Load saved configuration if exists
