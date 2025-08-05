@@ -67,7 +67,11 @@ public class WSPService {
             stepByUser
         );
         applyConstraints(encoder, request);
-        return encoder.solveCSP();
+        int[] solution = encoder.solveCSP();
+        if (solution == null) {
+            throw new IllegalStateException("No valid assignment found that satisfies all constraints");
+        }
+        return solution;
     }
 
     private int[] solveWithBacktracking(WSPRequest request, int[][] stepByUser) {

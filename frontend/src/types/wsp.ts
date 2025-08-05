@@ -1,5 +1,7 @@
+export type ConstraintType = 'BOD' | 'SOD' | 'binding' | 'separation';
+
 export interface Constraint {
-  type: 'BOD' | 'SOD';
+  type: ConstraintType;
   steps: number[];
 }
 
