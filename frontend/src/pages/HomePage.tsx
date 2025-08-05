@@ -143,14 +143,33 @@ const HomePage = () => {
                     <StatHelpText>{Math.round(progress)}% Complete</StatHelpText>
                   </Stat>
                 </HStack>
-                <Progress
-                  value={progress}
-                  size="lg"
-                  colorScheme="brand"
-                  borderRadius="full"
-                  w="full"
-                  bg={useColorModeValue('gray.100', 'gray.700')}
-                />
+                <Box position="relative" w="full">
+                  <Progress
+                    value={progress}
+                    size="lg"
+                    colorScheme="green"
+                    borderRadius="full"
+                    w="full"
+                    bg={useColorModeValue('gray.100', 'gray.700')}
+                    sx={{
+                      '& > div:first-of-type': {
+                        transition: 'all 0.5s ease-in-out',
+                      },
+                    }}
+                  />
+                  {progress > 0 && progress < 100 && (
+                    <Box
+                      position="absolute"
+                      right="0"
+                      top="-6"
+                      fontSize="sm"
+                      color={useColorModeValue('gray.600', 'gray.400')}
+                      fontWeight="medium"
+                    >
+                      {Math.round(progress)}%
+                    </Box>
+                  )}
+                </Box>
               </VStack>
             </CardBody>
           </Card>
