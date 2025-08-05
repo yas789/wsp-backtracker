@@ -1,8 +1,9 @@
-import { Box, ChakraProvider } from '@chakra-ui/react';
+import { Box, ChakraProvider, ColorModeScript } from '@chakra-ui/react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 import LoadingSpinner from './components/shared/LoadingSpinner';
 import { AppProvider } from './context/AppContext';
+import theme from './theme';
 
 // Lazy load pages for better performance
 const Layout = lazy(() => import('./components/layout/MainLayout'));
@@ -15,9 +16,10 @@ const AlgorithmPage = lazy(() => import('./pages/AlgorithmPage'));
 function App() {
   return (
     <AppProvider>
-      <ChakraProvider>
+      <ChakraProvider theme={theme}>
+        <ColorModeScript initialColorMode={theme.config.initialColorMode} />
         <Suspense fallback={<LoadingSpinner />}>
-          <Box minH="100vh" bg="gray.50">
+          <Box minH="100vh">
             <Routes>
               <Route path="/" element={<Layout />}>
                 <Route index element={<HomePage />} />

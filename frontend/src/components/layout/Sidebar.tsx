@@ -1,25 +1,32 @@
-import { 
-  Box, 
-  VStack, 
-  Link, 
-  Text, 
-  useColorModeValue, 
-  Icon, 
+import React from 'react';
+import {
+  Box,
+  VStack,
+  Link,
+  Text,
+  Icon,
+  useColorModeValue,
   Flex,
-  useColorMode,
   Divider,
-  Tooltip
+  Button,
+  IconButton,
+  HStack,
+  Badge,
+  Tooltip,
 } from '@chakra-ui/react';
-import { NavLink, useLocation } from 'react-router-dom';
-import { 
-  FiHome, 
-  FiSettings, 
-  FiLock, 
-  FiLink2, 
+import { Link as RouterLink, useLocation } from 'react-router-dom';
+import {
+  FiHome,
+  FiSettings,
+  FiUsers,
+  FiLock,
   FiCpu,
+  FiSun,
   FiMoon,
-  FiSun
+  FiX,
 } from 'react-icons/fi';
+import { useColorMode } from '@chakra-ui/react';
+import { useAppContext } from '../../context/AppContext';
 import ResetButton from '../shared/ResetButton';
 
 interface SidebarProps {
@@ -36,11 +43,11 @@ const Sidebar = ({ onClose }: SidebarProps) => {
   const location = useLocation();
 
   const navItems = [
-    { label: 'Home', path: '/', icon: FiHome },
-    { label: 'Configuration', path: '/config', icon: FiSettings },
-    { label: 'Authorization', path: '/auth', icon: FiLock },
-    { label: 'Constraints', path: '/constraints', icon: FiLink2 },
-    { label: 'Solver', path: '/solver', icon: FiCpu },
+    { name: 'Home', href: '/', icon: FiHome },
+    { name: 'Configuration', href: '/config', icon: FiSettings },
+    { name: 'Authorization', href: '/auth', icon: FiUsers },
+    { name: 'Constraints', href: '/constraints', icon: FiLock },
+    { name: 'Algorithm', href: '/solver', icon: FiCpu },
   ];
 
   const isActive = (path: string) => {
@@ -64,35 +71,73 @@ const Sidebar = ({ onClose }: SidebarProps) => {
       zIndex="docked"
     >
       <VStack align="stretch" spacing={1} px={4}>
-        {navItems.map((item) => (
-          <Link
-            key={item.path}
-            as={NavLink}
-            to={item.path}
-            display="flex"
-            alignItems="center"
-            p={3}
-            borderRadius="md"
-            _hover={{ 
-              bg: hoverBg, 
-              textDecoration: 'none',
-              transform: 'translateX(4px)'
-            }}
-            _activeLink={{
-              bg: activeBg,
-              color: activeColor,
-              fontWeight: 'semibold',
-              borderLeft: '4px solid',
-              borderLeftColor: 'blue.500',
-              pl: '12px',
-            }}
-            transition="all 0.2s"
-            onClick={onClose}
-          >
-            <Icon as={item.icon} mr={3} fontSize="lg" />
-            <Text>{item.label}</Text>
-          </Link>
-        ))}
+        {navItems.map((item) => {
+          const active = isActive(item.href);
+          const getStatusBadge = () => {
+            if (item.href === '/config' && status.config) return 'green';
+            if (item.href === '/auth' && status.auth) return 'green';
+            if (item.href === '/constraints' && status.constraints) return 'green';
+            return undefined;
+          };
+
+          return (
+            <Link
+              key={item.href}
+              as={RouterLink}
+              to={item.href}
+              textDecoration="none"
+              _hover={{ textDecoration: 'none' }}
+              onClick={onClose}
+            >
+              <Flex
+                align="center"
+                justify="space-between"
+                p={4}
+                rounded="xl"
+                cursor="pointer"
+                bg={active ? activeBg : 'transparent'}
+                color={active ? activeColor : 'inherit'}
+                _hover={{
+                  bg: hoverBg,
+                  transform: 'translateX(4px)',
+                  boxShadow: 'sm',
+                }}
+                transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+                border="1px"
+                borderColor={active ? 'brand.200' : 'transparent'}
+                position="relative"
+                _before={active ? {
+                  content: '""',
+                  position: 'absolute',
+                  left: 0,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  width: '4px',
+                  height: '60%',
+                  bg: 'brand.500',
+                  borderRadius: 'full',
+                } : {}}
+              >
+                <HStack spacing={3}>
+                  <Icon as={item.icon} boxSize={5} />
+                  <Text fontWeight={active ? '600' : '500'} fontSize="sm">
+                    {item.name}
+                  </Text>
+                </HStack>
+                {getStatusBadge() && (
+                  <Badge
+                    colorScheme={getStatusBadge()}
+                    size="sm"
+                    borderRadius="full"
+                    px={2}
+                  >
+                    ✓
+                  </Badge>
+                )}
+              </Flex>
+            </Link>
+          );
+        })}
       </VStack>
 
       <Divider my={4} />

@@ -1,303 +1,301 @@
-import { keyframes } from '@emotion/react';
-import { 
-  Box, 
-  Heading, 
-  Text, 
-  VStack, 
-  Button, 
-  useColorModeValue, 
-  Container, 
-  Flex, 
-  usePrefersReducedMotion,
+import React from 'react';
+import {
+  Box,
+  Heading,
+  Text,
+  VStack,
+  Button,
+  Container,
+  SimpleGrid,
   Icon,
-  useBreakpointValue
+  useColorModeValue,
+  HStack,
+  Badge,
+  Flex,
+  Progress,
+  Stat,
+  StatLabel,
+  StatNumber,
+  StatHelpText,
+  Card,
+  CardBody,
+  Divider,
 } from '@chakra-ui/react';
-import { useNavigate } from 'react-router-dom';
-import { FaCog, FaUserLock, FaLink, FaRocket } from 'react-icons/fa';
-
-// Animation keyframes
-const float = keyframes`
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
-`;
-
-const gradient = keyframes`
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-`;
+import { Link as RouterLink } from 'react-router-dom';
+import { FiSettings, FiUsers, FiLock, FiCpu, FiCheckCircle, FiArrowRight } from 'react-icons/fi';
+import { useAppContext } from '../context/AppContext';
 
 const HomePage = () => {
-  const navigate = useNavigate();
-  const prefersReducedMotion = usePrefersReducedMotion();
-  const animation = prefersReducedMotion
-    ? undefined
-    : `${float} 6s ease-in-out infinite`;
-
-  // Colors
+  const context = useAppContext();
+  
+  // Provide default values in case context is not yet initialized
+  const config = context?.config || { steps: 0, users: 0 };
+  const constraints = context?.constraints || [];
+  const authMatrix = context?.authMatrix || [];
+  const solutionHistory = context?.solutionHistory || [];
+  
   const cardBg = useColorModeValue('white', 'gray.800');
-  const cardHoverBg = useColorModeValue('gray.50', 'gray.700');
+  const borderColor = useColorModeValue('gray.200', 'gray.700');
   const gradientBg = useColorModeValue(
-    'linear(to-r, blue.500, teal.500)',
-    'linear(to-r, blue.300, teal.300)'
+    'linear(to-br, blue.50, purple.50, pink.50)',
+    'linear(to-br, gray.900, blue.900, purple.900)'
   );
-  const textColor = useColorModeValue('gray.600', 'gray.300');
-  const headingColor = useColorModeValue('gray.800', 'white');
 
-  const features = [
+  const getStepStatus = () => {
+    return {
+      config: config.steps > 0 && config.users > 0,
+      auth: authMatrix.length > 0,
+      constraints: constraints.length > 0,
+      solved: solutionHistory.length > 0,
+    };
+  };
+
+  const status = getStepStatus();
+  const completedSteps = Object.values(status).filter(Boolean).length;
+  const totalSteps = 4;
+  const progress = (completedSteps / totalSteps) * 100;
+
+  const steps = [
     {
       title: 'Configuration',
-      description: 'Set up your workflow steps and user roles.',
-      icon: FaCog,
-      bg: 'blue.100',
-      color: 'blue.500',
+      description: 'Set up your workflow with steps and users',
+      icon: FiSettings,
+      path: '/config',
+      color: 'blue',
+      completed: status.config,
+      stats: config.steps > 0 ? `${config.steps} steps, ${config.users} users` : 'Not configured',
     },
     {
-      title: 'Authorization',
-      description: 'Define which users can perform which steps.',
-      icon: FaUserLock,
-      bg: 'green.100',
-      color: 'green.500',
+      title: 'Authorization Matrix',
+      description: 'Define who can perform which steps',
+      icon: FiUsers,
+      path: '/auth',
+      color: 'green',
+      completed: status.auth,
+      stats: authMatrix.length > 0 ? `${authMatrix.length} authorizations` : 'Not defined',
     },
     {
       title: 'Constraints',
-      description: 'Specify separation of duty and binding of duty constraints.',
-      icon: FaLink,
-      bg: 'purple.100',
-      color: 'purple.500',
+      description: 'Add separation and binding constraints',
+      icon: FiLock,
+      path: '/constraints',
+      color: 'purple',
+      completed: status.constraints,
+      stats: constraints.length > 0 ? `${constraints.length} constraints` : 'No constraints',
+    },
+    {
+      title: 'Solve & Results',
+      description: 'Run algorithms to find valid assignments',
+      icon: FiCpu,
+      path: '/solver',
+      color: 'orange',
+      completed: status.solved,
+      stats: solutionHistory.length > 0 ? `${solutionHistory.length} solutions found` : 'Not solved yet',
     },
   ];
 
-  const buttonSize = useBreakpointValue({ base: 'md', md: 'lg' });
-  const headingSize = useBreakpointValue({ base: '2xl', md: '4xl' });
-  const subHeadingSize = useBreakpointValue({ base: 'lg', md: 'xl' });
-
   return (
-    <Box as="main" minH="calc(100vh - 64px)" py={8}>
-      <Container maxW="7xl" px={4}>
-        {/* Hero Section */}
-        <Flex
-          direction="column"
-          textAlign="center"
-          align="center"
-          py={16}
-          px={4}
-        >
-          <Box
-            mb={6}
-            px={4}
-            py={2}
-            borderRadius="full"
-            bg={useColorModeValue('blue.50', 'blue.900')}
-            color={useColorModeValue('blue.600', 'blue.200')}
-            fontSize="sm"
-            fontWeight="semibold"
-            letterSpacing="wide"
-            textTransform="uppercase"
-          >
-            Workflow Satisfiability Problem Solver
-          </Box>
-          
-          <Heading
-            as="h1"
-            size={headingSize}
-            fontWeight="extrabold"
-            letterSpacing="tight"
-            lineHeight={1.2}
-            mb={6}
-            color={headingColor}
-          >
-            Secure Access Control
-            <Box as="span" color={useColorModeValue('blue.500', 'blue.300')}>
-              {' '}for Complex Workflows
-            </Box>
-          </Heading>
-          
-          <Text
-            maxW="2xl"
-            fontSize={subHeadingSize}
-            color={textColor}
-            mb={10}
-            lineHeight={1.6}
-          >
-            Design, validate, and enforce access control policies with our intuitive WSP solver.
-          </Text>
-          
-          <Flex gap={4} flexWrap="wrap" justify="center">
-            <Button
-              size={buttonSize}
-              colorScheme="blue"
-              rightIcon={<FaRocket />}
-              px={8}
-              py={7}
-              fontSize="lg"
-              fontWeight="bold"
-              borderRadius="xl"
-              boxShadow="lg"
-              _hover={{
-                transform: 'translateY(-2px)',
-                boxShadow: 'xl',
-              }}
-              transition="all 0.2s"
-              onClick={() => navigate('/config')}
-            >
-              Get Started
-            </Button>
-            <Button
-              size={buttonSize}
-              variant="outline"
-              borderWidth="2px"
-              px={8}
-              py={7}
-              fontSize="lg"
-              fontWeight="semibold"
-              borderRadius="xl"
-              _hover={{
-                bg: useColorModeValue('gray.100', 'gray.700'),
-                transform: 'translateY(-2px)',
-              }}
-              transition="all 0.2s"
-            >
-              Learn More
-            </Button>
-          </Flex>
-        </Flex>
-
-        {/* Features Grid */}
-        <Box py={16}>
-          <Box maxW="3xl" mx="auto" textAlign="center" mb={16} px={4}>
-            <Text
-              fontSize="sm"
-              fontWeight="semibold"
-              color={useColorModeValue('blue.600', 'blue.300')}
-              mb={3}
-              letterSpacing="wide"
-            >
-              WORKFLOW DESIGN MADE SIMPLE
-            </Text>
+    <Box bgGradient={gradientBg} minH="calc(100vh - 160px)" borderRadius="2xl" p={1}>
+      <Container maxW="7xl" py={12}>
+        <VStack spacing={12} align="stretch">
+          {/* Hero Section */}
+          <Box textAlign="center">
             <Heading
-              as="h2"
-              size="xl"
-              fontWeight="extrabold"
+              size="2xl"
               mb={6}
-              color={headingColor}
+              bgGradient="linear(to-r, blue.400, purple.500, pink.400)"
+              bgClip="text"
+              fontWeight="800"
             >
-              Everything You Need in One Place
+              Workflow Satisfiability Problem Solver
             </Heading>
-            <Text fontSize="lg" color={textColor} maxW="2xl" mx="auto">
-              Our platform guides you through the entire process of creating and validating
-              secure workflow authorizations.
+            <Text
+              fontSize="xl"
+              color={useColorModeValue('gray.600', 'gray.300')}
+              maxW="4xl"
+              mx="auto"
+              lineHeight="tall"
+            >
+              Solve complex workflow assignment problems with advanced constraint satisfaction.
+              Define workflows, set authorization rules, add constraints, and discover optimal solutions
+              using state-of-the-art algorithms.
             </Text>
           </Box>
 
-          <Box
-            display="grid"
-            gridTemplateColumns={{ base: '1fr', md: 'repeat(3, 1fr)' }}
-            gap={8}
-            px={4}
-          >
-            {features.map((feature, index) => (
-              <Box
-                key={feature.title}
+          {/* Progress Overview */}
+          <Card bg={cardBg} shadow="xl" borderRadius="2xl">
+            <CardBody p={8}>
+              <VStack spacing={6}>
+                <HStack justify="space-between" w="full">
+                  <Box>
+                    <Heading size="lg" mb={2}>
+                      Workflow Progress
+                    </Heading>
+                    <Text color={useColorModeValue('gray.600', 'gray.400')}>
+                      Complete all steps to solve your workflow problem
+                    </Text>
+                  </Box>
+                  <Stat textAlign="right">
+                    <StatNumber fontSize="3xl" color="brand.500">
+                      {completedSteps}/{totalSteps}
+                    </StatNumber>
+                    <StatLabel>Steps Completed</StatLabel>
+                    <StatHelpText>{Math.round(progress)}% Complete</StatHelpText>
+                  </Stat>
+                </HStack>
+                <Progress
+                  value={progress}
+                  size="lg"
+                  colorScheme="brand"
+                  borderRadius="full"
+                  w="full"
+                  bg={useColorModeValue('gray.100', 'gray.700')}
+                />
+              </VStack>
+            </CardBody>
+          </Card>
+
+          {/* Workflow Steps */}
+          <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={8}>
+            {steps.map((step, index) => (
+              <Card
+                key={step.title}
                 bg={cardBg}
-                p={8}
-                borderRadius="xl"
-                boxShadow="lg"
-                textAlign="center"
-                borderWidth="1px"
-                borderColor={useColorModeValue('gray.100', 'gray.700')}
-                transition="all 0.3s ease"
+                shadow="lg"
+                borderRadius="2xl"
+                border="1px"
+                borderColor={step.completed ? `${step.color}.200` : borderColor}
                 _hover={{
-                  transform: 'translateY(-5px)',
-                  boxShadow: 'xl',
-                  borderColor: useColorModeValue('blue.100', 'blue.900'),
+                  transform: 'translateY(-4px)',
+                  shadow: '2xl',
+                  borderColor: `${step.color}.300`,
                 }}
+                transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+                cursor="pointer"
+                as={RouterLink}
+                to={step.path}
+                position="relative"
+                overflow="hidden"
               >
-                <Flex
-                  w={16}
-                  h={16}
-                  bg={feature.bg}
-                  color={feature.color}
-                  align="center"
-                  justify="center"
-                  borderRadius="xl"
-                  mx="auto"
-                  mb={6}
-                  fontSize="2xl"
-                  animation={animation}
-                  style={{
-                    animationDelay: `${index * 0.1}s`,
-                    animationPlayState: prefersReducedMotion ? 'paused' : 'running',
-                  }}
-                >
-                  <Icon as={feature.icon} boxSize={6} />
-                </Flex>
-                <Heading as="h3" size="md" mb={3} color={headingColor}>
-                  {feature.title}
-                </Heading>
-                <Text color={textColor} lineHeight="tall">
-                  {feature.description}
-                </Text>
-              </Box>
+                {step.completed && (
+                  <Box
+                    position="absolute"
+                    top={4}
+                    right={4}
+                    zIndex={1}
+                  >
+                    <Badge
+                      colorScheme="green"
+                      borderRadius="full"
+                      px={3}
+                      py={1}
+                      display="flex"
+                      alignItems="center"
+                      gap={1}
+                    >
+                      <Icon as={FiCheckCircle} boxSize={3} />
+                      Complete
+                    </Badge>
+                  </Box>
+                )}
+                <CardBody p={8}>
+                  <VStack spacing={6} align="start">
+                    <HStack spacing={4}>
+                      <Box
+                        p={4}
+                        borderRadius="2xl"
+                        bg={`${step.color}.100`}
+                        color={`${step.color}.600`}
+                        _dark={{
+                          bg: `${step.color}.900`,
+                          color: `${step.color}.300`,
+                        }}
+                      >
+                        <Icon as={step.icon} boxSize={8} />
+                      </Box>
+                      <Box flex={1}>
+                        <HStack spacing={2} mb={2}>
+                          <Text
+                            fontSize="sm"
+                            fontWeight="600"
+                            color={`${step.color}.500`}
+                            textTransform="uppercase"
+                            letterSpacing="wider"
+                          >
+                            Step {index + 1}
+                          </Text>
+                        </HStack>
+                        <Heading size="md" mb={2}>
+                          {step.title}
+                        </Heading>
+                      </Box>
+                    </HStack>
+                    
+                    <Text
+                      color={useColorModeValue('gray.600', 'gray.400')}
+                      lineHeight="tall"
+                    >
+                      {step.description}
+                    </Text>
+                    
+                    <Divider />
+                    
+                    <Flex justify="space-between" align="center" w="full">
+                      <Text
+                        fontSize="sm"
+                        fontWeight="500"
+                        color={useColorModeValue('gray.500', 'gray.400')}
+                      >
+                        {step.stats}
+                      </Text>
+                      <Icon
+                        as={FiArrowRight}
+                        color={`${step.color}.500`}
+                        boxSize={5}
+                        transition="transform 0.2s"
+                        _groupHover={{ transform: 'translateX(4px)' }}
+                      />
+                    </Flex>
+                  </VStack>
+                </CardBody>
+              </Card>
             ))}
-          </Box>
-        </Box>
+          </SimpleGrid>
 
-        {/* CTA Section */}
-        <Box
-          bgGradient={gradientBg}
-          borderRadius="2xl"
-          p={{ base: 8, md: 12 }}
-          textAlign="center"
-          color="white"
-          mb={16}
-          position="relative"
-          overflow="hidden"
-          _before={{
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'linear-gradient(45deg, rgba(0,0,0,0.1) 0%, rgba(255,255,255,0.2) 100%)',
-            zIndex: 0,
-          }}
-        >
-          <Box position="relative" zIndex={1}>
-            <Heading as="h2" size="xl" mb={4}>
-              Ready to Secure Your Workflows?
-            </Heading>
-            <Text fontSize="lg" mb={8} maxW="2xl" mx="auto" opacity={0.95}>
-              Start designing secure access control for your workflows today.
-              No credit card required.
-            </Text>
-            <Button
-              size="lg"
-              colorScheme="whiteAlpha"
-              color="white"
-              bg="rgba(255, 255, 255, 0.15)"
-              _hover={{
-                bg: 'rgba(255, 255, 255, 0.25)',
-                transform: 'translateY(-2px)',
-              }}
-              _active={{
-                bg: 'rgba(255, 255, 255, 0.1)',
-              }}
-              onClick={() => navigate('/config')}
-              px={8}
-              py={6}
-              fontSize="lg"
-              fontWeight="semibold"
-              borderRadius="xl"
-              boxShadow="lg"
-              transition="all 0.3s"
-            >
-              Get Started for Free
-            </Button>
+          {/* Call to Action */}
+          <Box textAlign="center" pt={8}>
+            <VStack spacing={4}>
+              <Button
+                as={RouterLink}
+                to={status.config ? '/auth' : '/config'}
+                size="lg"
+                colorScheme="brand"
+                rightIcon={<Icon as={FiArrowRight} />}
+                px={8}
+                py={6}
+                fontSize="lg"
+                fontWeight="600"
+                borderRadius="2xl"
+                shadow="lg"
+                _hover={{
+                  transform: 'translateY(-2px)',
+                  shadow: 'xl',
+                }}
+                transition="all 0.2s"
+              >
+                {status.config ? 'Continue Workflow' : 'Start Building Your Workflow'}
+              </Button>
+              <Text
+                fontSize="sm"
+                color={useColorModeValue('gray.500', 'gray.400')}
+              >
+                {completedSteps === 0
+                  ? 'Begin by configuring your workflow parameters'
+                  : `${totalSteps - completedSteps} steps remaining to complete your workflow`}
+              </Text>
+            </VStack>
           </Box>
-        </Box>
+        </VStack>
       </Container>
     </Box>
   );
