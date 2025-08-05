@@ -210,6 +210,9 @@ const AlgorithmPage = () => {
       };
       setSolution(processedResponse);
       setExecutionHistory(prev => [...prev, processedResponse]);
+      
+      // Add solution to global context for persistence
+      addSolution(processedResponse);
 
       // Show toast notification
       toast({

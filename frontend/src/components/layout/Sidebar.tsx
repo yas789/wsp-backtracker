@@ -98,6 +98,11 @@ const Sidebar = ({ onClose }: SidebarProps) => {
       <Divider my={4} />
 
       <Box px={4} mt="auto">
+        {/* Reset Button */}
+        <Box mb={3}>
+          <ResetButton size="sm" variant="outline" colorScheme="red" />
+        </Box>
+        
         <Tooltip label={`Switch to ${colorMode === 'light' ? 'dark' : 'light'} mode`} placement="right">
           <Flex
             as="button"

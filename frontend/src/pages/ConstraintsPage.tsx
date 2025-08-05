@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Box, 
@@ -60,27 +60,37 @@ const ConstraintsPage = () => {
   const toast = useToast();
 
   // Load constraints from global state and convert to UIConstraints
+  // Use a ref to prevent circular updates
+  const isUpdatingFromGlobal = React.useRef(false);
+  
   useEffect(() => {
-    const uiConstraints: UIConstraint[] = globalConstraints.map((constraint, index) => ({
-      ...constraint,
-      id: `constraint-${index}`,
-      type: constraint.type === 'SOD' ? 'separation' : 
-            constraint.type === 'BOD' ? 'binding' :
-            constraint.type as ConstraintType
-    }));
-    setConstraints(uiConstraints);
-  }, [globalConstraints]);
+    if (!isUpdatingFromGlobal.current) {
+      const uiConstraints: UIConstraint[] = globalConstraints.map((constraint, index) => ({
+        ...constraint,
+        id: `constraint-${index}`,
+        type: constraint.type === 'SOD' ? 'separation' : 
+              constraint.type === 'BOD' ? 'binding' :
+              constraint.type as ConstraintType
+      }));
+      setConstraints(uiConstraints);
+    }
+  }, [globalConstraints]); // React to global constraint changes
 
-  // Sync local constraints to global state
-  useEffect(() => {
-    const globalConstraints: BaseConstraint[] = constraints.map(constraint => ({
+  // Sync local constraints to global state only when local constraints change
+  const syncToGlobal = (localConstraints: UIConstraint[]) => {
+    isUpdatingFromGlobal.current = true;
+    const globalConstraints: BaseConstraint[] = localConstraints.map(constraint => ({
       type: constraint.type === 'separation' ? 'SOD' : 
             constraint.type === 'binding' ? 'BOD' :
             constraint.type as BaseConstraintType,
       steps: constraint.steps
     }));
     setGlobalConstraints(globalConstraints);
-  }, [constraints, setGlobalConstraints]);
+    // Reset the flag after a short delay to allow the global state to update
+    setTimeout(() => {
+      isUpdatingFromGlobal.current = false;
+    }, 0);
+  };
 
   // Check if configuration exists
   useEffect(() => {
@@ -116,7 +126,9 @@ const ConstraintsPage = () => {
       // No additional properties needed for separation/binding constraints
     };
 
-    setConstraints([...constraints, newConstraint]);
+    const updatedConstraints = [...constraints, newConstraint];
+    setConstraints(updatedConstraints);
+    syncToGlobal(updatedConstraints);
     
     // Reset form
     setSelectedSteps([]);
@@ -132,7 +144,9 @@ const ConstraintsPage = () => {
   };
 
   const handleRemoveConstraint = (id: string) => {
-    setConstraints(constraints.filter(c => c.id !== id));
+    const updatedConstraints = constraints.filter(c => c.id !== id);
+    setConstraints(updatedConstraints);
+    syncToGlobal(updatedConstraints);
   };
 
   const handleNext = () => {

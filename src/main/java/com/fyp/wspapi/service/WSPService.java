@@ -43,6 +43,12 @@ public class WSPService {
             }
 
             long solvingTime = System.currentTimeMillis() - startTime;
+            
+            // Check if solution is null and return appropriate response
+            if (solution == null) {
+                return WSPResponse.failure("No valid assignment found that satisfies all constraints", solvingTime, solverUsed);
+            }
+            
             return WSPResponse.success(solution, solvingTime, solverUsed);
 
         } catch (Exception e) {
