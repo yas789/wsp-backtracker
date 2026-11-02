@@ -66,6 +66,23 @@ public class WSPOrchestrator {
         return blockAssignments; 
     }
 
+    /**
+     * Finds one valid step-to-user assignment using the partition approach.
+     *
+     * @return the user assigned to each step, or null if the instance is unsatisfiable
+     */
+    public int[] findAssignment() {
+        PartitionGenerator generator = new PartitionGenerator(graph, numSteps);
+        generator.GenerateParitions();
+        for (List<Set<Integer>> partition : generator.getValidPartitions()) {
+            int[] matching = PartitionAuthorizer.authorizePartition(partition, authorized, numUsers);
+            if (matching != null) {
+                return buildVectorEncoding(partition, matching);
+            }
+        }
+        return null;
+    }
+
     private int[] buildVectorEncoding(List<Set<Integer>> partition, int[] blockToUser) {
         if (blockToUser == null) return null;
         int[] encoding = new int[numSteps];

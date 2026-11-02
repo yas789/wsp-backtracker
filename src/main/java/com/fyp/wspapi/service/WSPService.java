@@ -97,8 +97,7 @@ public class WSPService {
             request.getNumSteps(),
             request.getNumUsers()
         );
-        // For now, use backtracking as fallback until PBT is fully implemented
-        return solveWithBacktracking(request, stepByUser);
+        return orchestrator.findAssignment();
     }
 
     private void applyConstraints(Object solver, WSPRequest request) {
