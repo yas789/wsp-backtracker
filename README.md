@@ -1,151 +1,109 @@
-# WSP Solver: Workflow Satisfiability & Constraint Manager
+# WSP Solver
 
-[![Java](https://img.shields.io/badge/Java-11%2B-blue)](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![CI](https://github.com/yas789/wsp-backtracker/actions/workflows/ci.yml/badge.svg)](https://github.com/yas789/wsp-backtracker/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-A comprehensive solution for the Workflow Satisfiability Problem (WSP) featuring both a Fixed-Parameter Tractable (FPT) backtracking algorithm and a SAT/CSP encoding using Google OR-Tools. The application includes an intuitive web-based interface for configuring and solving workflow authorization problems.
+A solver and web interface for the Workflow Satisfiability Problem (WSP): can every step of a workflow be assigned to an authorised user while respecting separation-of-duty and binding-of-duty rules?
 
-## 🌟 Features
+It solves the same problem four ways so they can be compared: plain backtracking, pattern-based backtracking, and CSP and SAT encodings using Google OR-Tools.
 
-- **Dual Solving Approaches**
-  - FPT Backtracking Algorithm (PBT)
-  - SAT/CSP Encoding with Google OR-Tools
-  
-- **Interactive Web Interface**
-  - Step-by-step workflow configuration
-  - Visual authorization matrix editor
-  - Constraint management
-  - Real-time solution visualization
+![Solver page showing a solution found with pattern-based backtracking](docs/solver.png)
 
-- **Performance Optimized**
-  - O*(2ᵏlog(k)) time complexity for k steps
-  - Efficient pruning strategies
-  - Native library optimization
+## The problem
 
-## 🚀 Quick Start
+Given a set of steps, a set of users and a matrix of who may perform each step, assign every step to one authorised user so that:
 
-### Prerequisites
-- **Java 11 or later** ([Download](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html))
-- **Node.js 14+** (for frontend development, [Download](https://nodejs.org/))
+- **Must-same** (binding of duty): two steps go to the same user.
+- **Must-different** (separation of duty): two steps go to different users.
 
-### Running the Application
+## Solvers
 
-1. **Make the run script executable** (first time only):
-   ```bash
-   chmod +x run.sh
-   ```
+| Solver | Approach |
+|---|---|
+| Backtracking | Assigns steps one at a time and undoes any assignment that breaks a constraint. |
+| PBT | Enumerates the valid groupings of steps, then uses bipartite matching to give each group a user. Exponential only in the number of steps, not users. |
+| CSP | Models each step as an integer variable in OR-Tools CP-SAT. |
+| SAT | Models each step-user pair as a Boolean variable in OR-Tools CP-SAT. |
 
-2. **Start the application**:
-   ```bash
-   ./run.sh
-   ```
-   This will:
-   - Compile the Java backend
-   - Install frontend dependencies
-   - Start the development server
-   - Open the application in your default browser
+A test checks that all four agree on 300 seeded random instances and that every assignment they return is valid.
 
-## 🏗️ Project Structure
+## Benchmarks
 
-```
-wsp-backtracker/
-├── frontend/           # React-based web interface
-│   ├── public/         # Static files
-│   └── src/            # React components and logic
-│       ├── pages/      # Application pages
-│       ├── components/ # Reusable UI components
-│       └── context/    # Application state management
-│
-├── src/
-│   └── main/java/com/fyp/wspapi/
-│       ├── controller/ # REST API endpoints
-│       ├── model/      # Data models
-│       ├── service/    # Business logic
-│       └── solver/     # WSP solving algorithms
-│
-└── run.sh             # Build and run script
+Time for each solver to find one assignment, or prove there is none, on 200 random instances with 5 or 10 users. All four agreed on all 200, of which 125 were satisfiable.
+
+| Steps | Backtracking | PBT | CSP | SAT |
+|---|---|---|---|---|
+| 4 | 0.00 / 0.01 | 0.02 / 0.08 | 1.71 / 2.60 | 1.85 / 2.98 |
+| 6 | 0.00 / 0.18 | 0.04 / 32.10 | 1.13 / 3.70 | 1.47 / 4.32 |
+| 8 | 0.01 / 15.83 | 0.11 / 4.18 | 0.73 / 6.35 | 1.05 / 3.35 |
+| 10 | 0.01 / 8.10 | 0.28 / 230.26 | 1.01 / 11.91 | 1.52 / 9.62 |
+| 12 | 0.02 / 1167.91 | 0.81 / 986.73 | 0.30 / 10.73 | 1.21 / 4.83 |
+
+*Median / worst time in milliseconds, from a single run on an Apple M1 with 8 GB of memory.*
+
+Backtracking is fastest on a typical instance, but its worst case grows sharply. CSP and SAT cost a little more up front and stay predictable. These instances are too small to show PBT's advantage when there are many users, and it currently generates every grouping before checking any, which accounts for its slow worst cases.
+
+To reproduce:
+
+```bash
+mvn -q compile exec:java -Dexec.mainClass=WSP.BenchmarkRunner
 ```
 
-## 🔧 Configuration
+This prints the medians and writes every measurement to `results.csv`.
 
-### Backend Configuration
-Edit `src/main/resources/application.properties` to configure:
-- Server port (default: 8080)
-- Logging levels
-- Solver parameters
+## Run it
 
-### Frontend Configuration
-Edit `frontend/.env` to configure:
-- API base URL
-- Feature flags
-- UI settings
+You need Java 17+, Maven and Node.js 20+.
 
-## 🧩 Solving the Workflow Satisfiability Problem
+```bash
+./run.sh
+```
 
-### Problem Definition
-Assign each workflow step to exactly one authorized user while respecting:
-- **Must-same** constraints: Two steps must be assigned to the same user
-- **Must-different** constraints: Two steps must be assigned to different users
+This starts the API on `http://localhost:8080` and the web interface on `http://localhost:3000`.
 
-### Algorithms
+## Test it
 
-#### 1. PBT (Parameter-Backtracking) Algorithm
-- Recursive FPT algorithm parameterized by the number of steps (k)
-- Heavy pruning for practical performance
-- Time complexity: O*(2ᵏ)
+```bash
+mvn test                  # backend
+cd frontend && npm test   # frontend
+```
 
-#### 2. SAT/CSP Encoding
-- Translates WSP instances into CP-SAT models
-- Uses Google OR-Tools for solving
-- Supports complex constraints and optimizations
+## API
 
-## 🖥️ User Guide
+`POST /api/solve`
 
-### 1. Configuration
-- Set the number of users and steps
-- Click "Update" to apply changes
+```json
+{
+  "numSteps": 3,
+  "numUsers": 2,
+  "authorized": [[1, 1], [1, 1], [1, 1]],
+  "mustSameConstraints": [{ "step1": 1, "step2": 2 }],
+  "mustDifferentConstraints": [{ "step1": 0, "step2": 1 }],
+  "solverType": "PBT"
+}
+```
 
-### 2. Authorization Matrix
-- Define which users are authorized for which steps
-- Use bulk actions for quick updates
-- Visual feedback for current authorizations
+`solverType` can be `SAT`, `CSP`, `BACKTRACKING` or `PBT`. Steps and users are numbered from 0.
 
-### 3. Step Constraints
-- Add equality (=) or inequality (≠) constraints between steps
-- Visual graph of constraints
-- Real-time validation
+```json
+{
+  "solutionFound": true,
+  "assignment": [1, 0, 0],
+  "message": "Solution found successfully",
+  "solvingTimeMs": 0,
+  "solverUsed": "PBT"
+}
+```
 
-### 4. Solve
-- Choose between PBT or SAT/CSP solver
-- View solution details and statistics
-- Export results if needed
+## Project layout
 
-## 🐛 Troubleshooting
+```
+src/main/java/WSP/            Solvers and benchmark
+src/main/java/com/fyp/wspapi/ Spring Boot API
+frontend/                     React and Chakra UI interface
+FYP/                          Original final-year project code
+```
 
-### Common Issues
-1. **Port already in use**
-   - Check for other Java processes: `jps -l`
-   - Kill the process: `kill <PID>`
-   - Or change the server port in `application.properties`
+## License
 
-2. **Java version issues**
-   - Verify Java version: `java -version`
-   - Ensure JAVA_HOME is set correctly
-
-3. **Frontend build errors**
-   - Clear node modules: `cd frontend && rm -rf node_modules`
-   - Reinstall dependencies: `npm install`
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-
-
-## 📧 Contact
-
-For questions or feedback, please open an issue on GitHub.
-
-## 📝 Credits
-
-- **Yassir Maknaoui** - [GitHub](https://github.com/yassirmaknaoui)
+[MIT](LICENSE)

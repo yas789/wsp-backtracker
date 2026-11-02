@@ -1,104 +1,104 @@
-import React from 'react';
-import { render, screen, waitFor, userEvent } from '../../test-utils';
+import { render, screen, waitFor } from '../../test-utils';
 import AlgorithmPage from '../AlgorithmPage';
-import { http, HttpResponse } from 'msw';
-import { server } from '../../mocks/server';
+import { solveWSP } from '../../api/wspApi';
 
-// Helper function to find elements by text content
-const getByTextContent = (text: string) => {
-  return screen.getByText((content: string, element?: Element) => {
-    return element?.textContent === text;
-  });
+jest.mock('../../api/wspApi');
+const mockedSolve = solveWSP as jest.MockedFunction<typeof solveWSP>;
+
+const mockNavigate = jest.fn();
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useNavigate: () => mockNavigate,
+}));
+
+const savedState = {
+  config: { steps: 2, users: 2 },
+  constraints: [],
+  authMatrix: [[1, 1], [1, 1]],
+  solutions: [],
 };
 
-describe('AlgorithmPage', () => {
-  // Mock sessionStorage
-  const mockAuthMatrix = [[true, true], [true, true], [true, true]];
-  const mockConstraints = [
-    { type: 'SEPARATION', steps: [0, 1] },
-    { type: 'BINDING', steps: [1, 2] }
-  ];
+const solveButton = () => screen.getByRole('button', { name: /solve/i });
 
+describe('AlgorithmPage', () => {
   beforeEach(() => {
-    // Mock sessionStorage
-    jest.spyOn(window.sessionStorage.__proto__, 'getItem')
-      .mockImplementation((key) => {
-        if (key === 'authMatrix') return JSON.stringify(mockAuthMatrix);
-        if (key === 'constraints') return JSON.stringify(mockConstraints);
-        if (key === 'stepsCount') return '3';
-        if (key === 'usersCount') return '2';
-        return null;
-      });
+    jest.clearAllMocks();
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    localStorage.setItem('wspAppState', JSON.stringify(savedState));
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    localStorage.clear();
+    jest.restoreAllMocks();
   });
 
-  it('renders correctly', () => {
+  it('offers all four solvers', () => {
     render(<AlgorithmPage />);
 
-    // Check that the page renders correctly
-    expect(screen.getByText(/algorithm configuration/i)).toBeTruthy();
-    expect(screen.getByText(/solver type/i)).toBeTruthy();
-    expect(screen.getByRole('button', { name: /solve/i })).toBeTruthy();
+    const options = Array.from(screen.getByRole('combobox').querySelectorAll('option'));
+    expect(options.map((option) => option.getAttribute('value'))).toEqual([
+      'CSP',
+      'BACKTRACKING',
+      'PBT',
+      'SAT',
+    ]);
   });
 
-  it('renders the algorithm selector with correct options', () => {
-    render(<AlgorithmPage />);
-    
-    // Check for solver type text and combobox
-    expect(screen.getByText(/solver type/i)).toBeTruthy();
-    expect(screen.getByRole('combobox')).toBeTruthy();
-  });
-
-  it('submits the form and displays solution', async () => {
-    const { user } = render(<AlgorithmPage />);
-    
-    // Select algorithm
-    const select = screen.getByRole('combobox');
-    await user.selectOptions(select, 'SAT');
-    
-    // Click solve button
-    const solveButton = screen.getByRole('button', { name: /solve/i });
-    await user.click(solveButton);
-    
-    // Wait for solution
-    await waitFor(() => {
-      expect(screen.getByText(/solution found/i)).toBeTruthy();
+  it('sends the selected solver and shows the assignment', async () => {
+    mockedSolve.mockResolvedValueOnce({
+      solutionFound: true,
+      assignment: [0, 1],
+      solvingTimeMs: 42,
+      solverUsed: 'PBT',
+      message: 'Solution found',
+      timestamp: '2025-01-01T00:00:00Z',
     });
-  });
-
-  it('shows error when API fails', async () => {
-    // Override the default handler to return an error
-    server.use(
-      http.post('/api/solve', () => {
-        return new HttpResponse(
-          JSON.stringify({ message: 'Internal server error' }),
-          { status: 500, headers: { 'Content-Type': 'application/json' } }
-        );
-      })
-    );
-
     const { user } = render(<AlgorithmPage />);
-    
-    // Click solve button
-    const solveButton = screen.getByRole('button', { name: /solve/i });
-    await user.click(solveButton);
 
-    // Wait for the error to be displayed
-    await waitFor(() => {
-      expect(screen.getByText(/error/i)).toBeTruthy();
+    await user.selectOptions(screen.getByRole('combobox'), 'PBT');
+    await user.click(solveButton());
+
+    await waitFor(() => expect(mockedSolve).toHaveBeenCalledTimes(1));
+    expect(mockedSolve.mock.calls[0][0]).toMatchObject({
+      numSteps: 2,
+      numUsers: 2,
+      solverType: 'PBT',
     });
+    expect((await screen.findAllByText(/PBT found a solution in 42ms/i)).length).toBeGreaterThan(0);
   });
 
-  it('shows validation message when no configuration exists', () => {
-    // Clear sessionStorage to simulate no configuration
-    sessionStorage.clear();
-    
+  it('shows the backend message when no solution exists', async () => {
+    mockedSolve.mockResolvedValueOnce({
+      solutionFound: false,
+      assignment: [],
+      solvingTimeMs: 1,
+      solverUsed: 'CSP',
+      message: 'No valid assignment found that satisfies all constraints',
+      timestamp: '2025-01-01T00:00:00Z',
+    });
+    const { user } = render(<AlgorithmPage />);
+
+    await user.click(solveButton());
+
+    expect(
+      (await screen.findAllByText('No valid assignment found that satisfies all constraints')).length,
+    ).toBeGreaterThan(0);
+  });
+
+  it('shows an error when the API call fails', async () => {
+    mockedSolve.mockRejectedValueOnce(new Error('Request failed with status code 500'));
+    const { user } = render(<AlgorithmPage />);
+
+    await user.click(solveButton());
+
+    expect(await screen.findByText('Request failed with status code 500')).toBeInTheDocument();
+  });
+
+  it('redirects to configuration when none exists', async () => {
+    localStorage.clear();
     render(<AlgorithmPage />);
-    
-    // Check for any validation or configuration message
-    expect(screen.getByText(/algorithm configuration/i)).toBeTruthy();
+
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/config'));
   });
 });

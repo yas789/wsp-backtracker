@@ -134,7 +134,7 @@ public class WSPControllerIntegrationTest {
                 .andExpect(jsonPath("$.assignment").isEmpty())
                 .andExpect(jsonPath("$.solvingTimeMs").isNumber())
                 .andExpect(jsonPath("$.solverUsed").value("SAT"))
-                .andExpect(jsonPath("$.message").value("No solution found"));
+                .andExpect(jsonPath("$.message").value("No valid assignment found that satisfies all constraints"));
     }
 
     @Test

@@ -17,6 +17,11 @@ import java.util.List;
  * using SAT-based constraints with OR-Tools.
  */
 public class WSPSATEncoder {
+    static {
+        // Load OR-Tools native libraries before any solver call
+        Loader.loadNativeLibraries();
+    }
+
     private int numSteps;       
     private int numUsers;       
     private int[][] authorized;
@@ -146,8 +151,6 @@ public class WSPSATEncoder {
     }
     
     public static void main(String[] args) {
-        //note: loading the library takes quite some time for some reason<- Delete this 
-        Loader.loadNativeLibraries();
         int numSteps = 3;
         int numUsers = 2;
         

@@ -1,0 +1,12 @@
+# Build output
+target/
+out/
+results.csv
+
+# Node
+node_modules/
+
+# OS and editor files
+.DS_Store
+.vscode/
+.idea/

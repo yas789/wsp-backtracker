@@ -10,7 +10,6 @@ import com.fyp.wspapi.dto.WSPRequest;
 import com.fyp.wspapi.dto.WSPResponse;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.function.BiConsumer;
 
 @Service
@@ -73,11 +72,7 @@ public class WSPService {
             stepByUser
         );
         applyConstraints(encoder, request);
-        int[] solution = encoder.solveCSP();
-        if (solution == null) {
-            throw new IllegalStateException("No valid assignment found that satisfies all constraints");
-        }
-        return solution;
+        return encoder.solveCSP();
     }
 
     private int[] solveWithBacktracking(WSPRequest request, int[][] stepByUser) {
@@ -88,9 +83,7 @@ public class WSPService {
             request.getNumSteps(),
             stepByUser
         );
-        wsp.runBacktracking();
-        List<int[]> solutions = wsp.getSolutions();
-        return solutions.isEmpty() ? null : solutions.get(0);
+        return wsp.findFirstSolution();
     }
 
     private int[] solveWithPBT(WSPRequest request, int[][] stepByUser) {
@@ -101,8 +94,7 @@ public class WSPService {
             request.getNumSteps(),
             request.getNumUsers()
         );
-        // For now, use backtracking as fallback until PBT is fully implemented
-        return solveWithBacktracking(request, stepByUser);
+        return orchestrator.findAssignment();
     }
 
     private void applyConstraints(Object solver, WSPRequest request) {

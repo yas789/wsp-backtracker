@@ -1,57 +1,45 @@
-import { http, HttpResponse } from 'msw';
-import { server } from '../../mocks/server';
-import { solveWSP, getConstraints } from '../wspApi';
+import axios from 'axios';
+import { getConstraints, solveWSP } from '../wspApi';
+import { WSPRequest } from '../../types/wsp';
+
+jest.mock('axios');
+const mockedAxios = axios as jest.Mocked<typeof axios>;
+
+const request: WSPRequest = {
+  numSteps: 2,
+  numUsers: 2,
+  authorized: [[1, 1], [1, 1]],
+  mustSameConstraints: [],
+  mustDifferentConstraints: [{ step1: 0, step2: 1 }],
+  solverType: 'SAT',
+};
 
 describe('wspApi', () => {
-  it('sends correct request and returns solution', async () => {
-    const request = {
-      numSteps: 3,
-      numUsers: 2,
-      authorized: [[true, true], [true, true], [true, true]],
-      mustSameConstraints: [],
-      mustDifferentConstraints: [[0, 1]],
-      solverType: 'SAT' as const
-    };
-
-    const response = await solveWSP(request);
-    
-    expect(response).toEqual({
+  it('posts the request and returns the solution', async () => {
+    const solution = {
       solutionFound: true,
-      assignment: [0, 1, 0],
+      assignment: [0, 1],
       solvingTimeMs: 42,
       solverUsed: 'SAT',
-      message: 'Solution found'
-    });
+      message: 'Solution found',
+    };
+    mockedAxios.post.mockResolvedValueOnce({ data: solution });
+
+    await expect(solveWSP(request)).resolves.toEqual(solution);
+    expect(mockedAxios.post).toHaveBeenCalledWith('http://localhost:8080/api/solve', request);
   });
 
-  it('handles API errors', async () => {
-    server.use(
-      http.post('/api/solve', () => {
-        return new HttpResponse(
-          JSON.stringify({ message: 'Internal server error' }),
-          { status: 500, headers: { 'Content-Type': 'application/json' } }
-        );
-      })
-    );
-
-    const request = {
-      numSteps: 3,
-      numUsers: 2,
-      authorized: [[true, true], [true, true], [true, true]],
-      mustSameConstraints: [],
-      mustDifferentConstraints: [[0, 1]],
-      solverType: 'SAT' as const
-    };
+  it('propagates API errors', async () => {
+    mockedAxios.post.mockRejectedValueOnce(new Error('Request failed with status code 500'));
 
     await expect(solveWSP(request)).rejects.toThrow('Request failed with status code 500');
   });
 
   it('fetches constraints', async () => {
-    const constraints = await getConstraints();
-    
-    expect(constraints).toEqual([
-      { id: 1, type: 'SEPARATION', steps: [0, 1] },
-      { id: 2, type: 'BINDING', steps: [1, 2] }
-    ]);
+    const constraints = [{ type: 'SEPARATION', steps: [0, 1] }];
+    mockedAxios.get.mockResolvedValueOnce({ data: constraints });
+
+    await expect(getConstraints()).resolves.toEqual(constraints);
+    expect(mockedAxios.get).toHaveBeenCalledWith('http://localhost:8080/api/constraints');
   });
 });

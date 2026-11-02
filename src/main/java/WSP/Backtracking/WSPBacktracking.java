@@ -70,6 +70,31 @@ private void backtracking(int stepIndex) {
 
 
 /**
+ * Finds one valid assignment and stops, without enumerating the rest.
+ *
+ * @return the user assigned to each step, or null if the instance is unsatisfiable
+ */
+public int[] findFirstSolution() {
+    return searchFirst(0) ? encoding.clone() : null;
+}
+
+private boolean searchFirst(int stepIndex) {
+    if (stepIndex == numSteps) {
+        return true;
+    }
+    for (int i = 0; i < numUsers; i++) {
+        if (authorisation[stepIndex][i] != 1) {
+            continue;
+        }
+        encoding[stepIndex] = i;
+        if (graph.AssignmentValidation(encoding, stepIndex) && searchFirst(stepIndex + 1)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
  * Get all found solutions
  * @return List of solutions, where each solution is an array of user assignments
  */

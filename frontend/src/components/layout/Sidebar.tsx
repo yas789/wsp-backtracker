@@ -41,6 +41,7 @@ const Sidebar = ({ onClose }: SidebarProps) => {
   const activeColor = useColorModeValue('blue.700', 'white');
   const hoverBg = useColorModeValue('gray.100', 'gray.700');
   const location = useLocation();
+  const { config, authMatrix, constraints } = useAppContext();
 
   const navItems = [
     { name: 'Home', href: '/', icon: FiHome },
@@ -74,9 +75,9 @@ const Sidebar = ({ onClose }: SidebarProps) => {
         {navItems.map((item) => {
           const active = isActive(item.href);
           const getStatusBadge = () => {
-            if (item.href === '/config' && status.config) return 'green';
-            if (item.href === '/auth' && status.auth) return 'green';
-            if (item.href === '/constraints' && status.constraints) return 'green';
+            if (item.href === '/config' && config.steps > 0 && config.users > 0) return 'green';
+            if (item.href === '/auth' && authMatrix.length > 0) return 'green';
+            if (item.href === '/constraints' && constraints.length > 0) return 'green';
             return undefined;
           };
 
