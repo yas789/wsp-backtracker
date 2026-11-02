@@ -176,7 +176,22 @@ public class WSPServiceTest {
         assertTrue(response.getAssignment() == null || response.getAssignment().length == 0);
         assertEquals("SAT", response.getSolverUsed());
         assertTrue(response.getSolvingTimeMs() >= 0);
-        assertEquals("No solution found", response.getMessage());
+        assertEquals("No valid assignment found that satisfies all constraints", response.getMessage());
+    }
+
+    @Test
+    public void testSolveWSP_CSP_NoSolutionReportsSolver() {
+        WSPRequest request = new WSPRequest();
+        request.setNumSteps(2);
+        request.setNumUsers(1);
+        request.setSolverType("CSP");
+        request.setAuthorized(new int[][] {{1}, {0}});
+
+        WSPResponse response = wspService.solveWSP(request);
+
+        assertFalse(response.isSolutionFound());
+        assertEquals("CSP", response.getSolverUsed());
+        assertEquals("No valid assignment found that satisfies all constraints", response.getMessage());
     }
 
     @Test
