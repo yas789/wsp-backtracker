@@ -195,6 +195,28 @@ public class WSPServiceTest {
     }
 
     @Test
+    public void testSolveWSP_Backtracking_StopsAtFirstSolution() {
+        // 5^30 valid assignments: enumerating them would never finish.
+        int steps = 30;
+        int users = 5;
+        int[][] authorized = new int[steps][users];
+        for (int[] row : authorized) {
+            java.util.Arrays.fill(row, 1);
+        }
+        WSPRequest request = new WSPRequest();
+        request.setNumSteps(steps);
+        request.setNumUsers(users);
+        request.setSolverType("BACKTRACKING");
+        request.setAuthorized(authorized);
+
+        WSPResponse response = org.junit.jupiter.api.Assertions.assertTimeoutPreemptively(
+            java.time.Duration.ofSeconds(5), () -> wspService.solveWSP(request));
+
+        assertTrue(response.isSolutionFound());
+        assertEquals(steps, response.getAssignment().length);
+    }
+
+    @Test
     public void testSolveWSP_UnsupportedSolver() {
         // Given
         WSPRequest request = createBasicRequest("INVALID_SOLVER");
