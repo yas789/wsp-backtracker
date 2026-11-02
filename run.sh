@@ -1,17 +1,12 @@
 #!/usr/bin/env bash
+# Starts the Spring Boot API on :8080 and the Vite dev server for the frontend.
 set -e
+cd "$(dirname "$0")"
 
-# 1) ensure out/ exists
-mkdir -p out
+mvn -q spring-boot:run &
+BACKEND_PID=$!
+trap 'kill "$BACKEND_PID" 2>/dev/null || true' EXIT
 
-# 2) gather all Java sources under FYP/WSP into a temp file
-find FYP/WSP -name '*.java' > sources.txt
-
-# 3) compile them using every JAR in lib/ on the classpath
-javac -cp "lib/*" -d out @sources.txt
-
-# 4) clean up
-rm sources.txt
-
-# 5) run your main class (adjust package if needed)
-java -cp "out:lib/*" WSP.GUI.LayoutManagerDemo
+cd frontend
+[ -d node_modules ] || npm ci
+npm run dev
